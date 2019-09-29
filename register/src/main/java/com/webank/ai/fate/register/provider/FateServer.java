@@ -74,7 +74,7 @@ public  class FateServer extends Server {
         @Override
         public Server shutdown() {
             logger.info("grpc server prepare shutdown");
-            registry.destroy();
+//            registry.destroy();
             this.server.shutdown();
             logger.info("grpc server shutdown!!!!!!!");
             return this;

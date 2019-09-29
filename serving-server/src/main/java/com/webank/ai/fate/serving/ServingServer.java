@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving;
 
+import com.google.common.collect.Sets;
 import com.webank.ai.fate.core.network.grpc.client.GrpcClientPool;
 import com.webank.ai.fate.core.utils.Configuration;
 import com.webank.ai.fate.register.provider.FateServer;
@@ -38,7 +39,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.PropertySource;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,19 +115,22 @@ public class ServingServer implements InitializingBean{
 
     private void stop() {
         if (server != null) {
-            server.shutdown();
+            if (useRegister) {
 
-            if(useRegister){
+                ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
+                Set<URL> registered = zookeeperRegistry.getRegistered();
 
-                ZookeeperRegistry  zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-                Set<URL> registered  =zookeeperRegistry.getRegistered();
+                Set<URL> urls = Sets.newHashSet();
+                urls.addAll(registered);
 
-                registered.forEach(url->{
-                    LOGGER.info("unregister {}",url);
+                urls.forEach(url -> {
+                    LOGGER.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
-
                 });
+
+                zookeeperRegistry.destroy();
             }
+            server.shutdown();
         }
     }
 
