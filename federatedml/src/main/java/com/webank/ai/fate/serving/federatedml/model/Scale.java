@@ -4,6 +4,8 @@ import com.webank.ai.fate.core.constant.StatusCode;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleMetaProto.ScaleMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleParamProto.ScaleParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,14 +34,14 @@ public class Scale extends BaseModel {
     }
 
     @Override
-    public Map<String, Object> predict(Context context, List<Map<String, Object>> inputDatas, Map<String, Object> predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputDatas, FederatedParams predictParams) {
         Map<String, Object> outputData = inputDatas.get(0);
         if (this.need_run) {
             String scaleMethod = this.scaleMeta.getMethod();
-            if (scaleMethod.toLowerCase().equals("min_max_scale")) {
+            if (scaleMethod.toLowerCase().equals(Dict.MIN_MAX_SCALE)) {
                 MinMaxScale minMaxScale = new MinMaxScale();
                 outputData = minMaxScale.transform(inputDatas.get(0), this.scaleParam.getColScaleParamMap());
-            } else if (scaleMethod.toLowerCase().equals("standard_scale")) {
+            } else if (scaleMethod.toLowerCase().equals(Dict.STANDARD_SCALE)) {
                 StandardScale standardScale = new StandardScale();
                 outputData = standardScale.transform(inputDatas.get(0), this.scaleParam.getColScaleParamMap());
             }

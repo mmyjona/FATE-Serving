@@ -38,6 +38,13 @@ public class ReentrantReadWriteMapPool<K, V> extends BaseMapPool<K, V> {
         this.pool = staticMap;
     }
 
+
+    public  Map  getDataMap(){
+        return  pool;
+    }
+
+
+
     @Override
     public void put(K key, V value) {
         this.writeLock.lock();

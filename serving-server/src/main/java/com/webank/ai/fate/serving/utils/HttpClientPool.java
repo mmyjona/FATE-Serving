@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.utils;
 
 import com.webank.ai.fate.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.config.Registry;
@@ -58,7 +59,7 @@ public class HttpClientPool {
                 .setConnectionRequestTimeout(500)
                 .setConnectTimeout(500)
                 .setSocketTimeout(2000).build();
-        httpRequestBase.addHeader("Content-Type", "application/json;charset=UTF-8");
+        httpRequestBase.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
         if (headers != null){
             headers.forEach((key, value) -> {
                 httpRequestBase.addHeader(key, value);
@@ -73,8 +74,8 @@ public class HttpClientPool {
             builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create().register(
-                    "http", PlainConnectionSocketFactory.getSocketFactory()).register(
-                    "https", sslsf).build();
+                    Dict.HTTP, PlainConnectionSocketFactory.getSocketFactory()).register(
+                    Dict.HTTPS, sslsf).build();
             poolConnManager = new PoolingHttpClientConnectionManager(
                     socketFactoryRegistry);
             poolConnManager.setMaxTotal(500);
@@ -113,8 +114,8 @@ public class HttpClientPool {
     public static String sendPost(String url, Map<String, Object> requestData, Map<String, String> headers){
         HttpPost httpPost = new HttpPost(url);
         config(httpPost, headers);
-        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), "UTF-8");
-        stringEntity.setContentEncoding("UTF-8");
+        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
+        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
         httpPost.setEntity(stringEntity);
         return getResponse(httpPost);
     }
@@ -139,7 +140,7 @@ public class HttpClientPool {
             response = httpClient.execute(request,
                     HttpClientContext.create());
             HttpEntity entity = response.getEntity();
-            String result = EntityUtils.toString(entity, "utf-8");
+            String result = EntityUtils.toString(entity, Dict.CHARSET_UTF8);
             EntityUtils.consume(entity);
             return result;
         } catch (IOException ex) {

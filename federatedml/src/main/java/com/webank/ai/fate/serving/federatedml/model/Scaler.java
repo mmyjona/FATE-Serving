@@ -4,6 +4,7 @@ import com.webank.ai.fate.core.constant.StatusCode;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleMetaProto.ScaleMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleParamProto.ScaleParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +33,7 @@ public class Scaler extends BaseModel {
     }
 
     @Override
-    public Map<String, Object> predict(Context context, List<Map<String, Object>> inputData, Map<String, Object> predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 //        if (this.need_run) {
 //            String scaleMethod = this.scaleMeta.getMethod();
 //            if (scaleMethod.toLowerCase().equals("min_max_scale")) {

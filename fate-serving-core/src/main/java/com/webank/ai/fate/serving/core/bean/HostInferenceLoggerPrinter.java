@@ -19,8 +19,8 @@ public class HostInferenceLoggerPrinter implements  LoggerPrinter<Map,ReturnResu
 
 
                 LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}",
-                        GetSystemInfo.getLocalIp(),  context.getSeqNo(),req != null ? ((Map) req).get(Dict.CASEID) : "NONE", context.getActionType(), context.getCostTime(),
-                        resp != null ? resp.getRetcode() : "NONE",WatchDog.get(), req,resp
+                        GetSystemInfo.getLocalIp(),  context.getSeqNo(),req != null ? ((Map) req).get(Dict.CASEID) : Dict.NONE, context.getActionType(), context.getCostTime(),
+                        resp != null ? resp.getRetcode() : Dict.NONE,WatchDog.get(), req,resp
                 );
 
         }

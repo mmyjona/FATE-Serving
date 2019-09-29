@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.manger;
 
 import com.webank.ai.fate.core.utils.Configuration;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,8 +31,8 @@ public class InferenceWorkerManager {
     static {
         LinkedBlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>(10);
         threadPoolExecutor = new ThreadPoolExecutor(
-                Configuration.getPropertyInt("inferenceWorkerThreadNum"),
-                Configuration.getPropertyInt("inferenceWorkerThreadNum"),
+                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM),
+                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM),
                 60,
                 TimeUnit.SECONDS,
                 taskQueue,

@@ -6,6 +6,7 @@ import com.webank.ai.fate.serving.core.monitor.WatchDog;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.ApplicationContext;
 
 
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 public class BaseContext<Req ,Resp extends ReturnResult> implements Context<Req,Resp> {
 
+    public  static ApplicationContext applicationContext;
 
     long   timestamp;
 
@@ -27,8 +29,6 @@ public class BaseContext<Req ,Resp extends ReturnResult> implements Context<Req,
         this.dataMap = dataMap;
         this.loggerPrinter =loggerPrinter;
     }
-
-
 
     private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
 

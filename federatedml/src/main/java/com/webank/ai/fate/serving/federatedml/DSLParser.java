@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.federatedml;
 
 import com.webank.ai.fate.core.constant.StatusCode;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +31,7 @@ public class DSLParser {
         LOGGER.info("start parse dag from dsl");
         try {
             JSONObject dsl = new JSONObject(jsonStr);
-            JSONObject components = dsl.getJSONObject("components");
+            JSONObject components = dsl.getJSONObject(Dict.DSL_COMPONENTS);
             
             LOGGER.info("start topo sort");
             topoSort(components, this.topoRankComponent);
@@ -44,13 +45,13 @@ public class DSLParser {
                 String componentName = topoRankComponent.get(i);
                 LOGGER.info("component is {}", componentName);
                 JSONObject component = components.getJSONObject(componentName);
-                String[] codePath = ((String)component.get("CodePath")).split("/", -1);
+                String[] codePath = ((String)component.get(Dict.DSL_CODE_PATH)).split("/", -1);
                 LOGGER.info("code path splits is {}", codePath);
                 String module = codePath[codePath.length - 1];
                 LOGGER.info("module is {}", module);
                 componentModuleMap.put(componentName, module);
         
-                JSONObject upData = component.getJSONObject("input").getJSONObject("data");
+                JSONObject upData = component.getJSONObject(Dict.DSL_INPUT).getJSONObject(Dict.DSL_DATA);
                 if (upData != null) {
                     int componentId = this.componentIds.get(componentName);
                     Iterator<String> dataKeyIterator = upData.keys();
@@ -63,7 +64,7 @@ public class DSLParser {
                                 upInputs.put(componentId, new HashSet<Integer>());
                             }
 
-                            if (upComponent.equals("args")) {
+                            if (upComponent.equals(Dict.DSL_ARGS)) {
                                 upInputs.get(componentId).add(-1);
                             } else {
                                 upInputs.get(componentId).add(this.componentIds.get(upComponent));

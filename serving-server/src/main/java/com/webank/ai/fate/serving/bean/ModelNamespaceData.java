@@ -16,8 +16,11 @@
 
 package com.webank.ai.fate.serving.bean;
 
-import com.webank.ai.fate.core.bean.FederatedParty;
-import com.webank.ai.fate.core.bean.FederatedRoles;
+
+
+
+import com.webank.ai.fate.serving.core.bean.FederatedParty;
+import com.webank.ai.fate.serving.core.bean.FederatedRoles;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 
 public class ModelNamespaceData {

@@ -17,8 +17,8 @@ public class GuestInferenceLoggerPrinter implements  LoggerPrinter<Request,Retur
     public void printLog(Context context, Request req, ReturnResult resp) {
 
 
-            LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(),context.getSeqNo(), req != null ? ((Request) req).getCaseid() : "NONE", context.getActionType(), context.getCostTime(),
-                    resp != null ? resp.getRetcode() : "NONE", WatchDog.get(), req,resp);
+            LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(),context.getSeqNo(), req != null ? ((Request) req).getCaseid() : Dict.NONE, context.getActionType(), context.getCostTime(),
+                    resp != null ? resp.getRetcode() : Dict.NONE, WatchDog.get(), req,resp);
 
         }
 }

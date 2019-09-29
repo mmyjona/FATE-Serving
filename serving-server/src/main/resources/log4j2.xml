@@ -136,8 +136,8 @@
         </AsyncLogger>
 
 
-        <AsyncRoot level="info" includeLocation="true">
-            <AppenderRef ref="info" level="info"/>
+        <AsyncRoot level="debug" includeLocation="true">
+            <AppenderRef ref="info" level="debug"/>
             <AppenderRef ref="ErrorLog" level="error"/>
         </AsyncRoot>
     </Loggers>

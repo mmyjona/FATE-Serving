@@ -17,8 +17,8 @@ public class BaseLoggerPrinter implements   LoggerPrinter<Object,ReturnResult>{
     @Override
     public void printLog(Context context, Object req, ReturnResult resp) {
 
-        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(),context.getSeqNo(), "NONE", context.getActionType(), context.getCostTime(),
-                resp != null ? resp.getRetcode() : "NONE", WatchDog.get(), req,resp);
+        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(),context.getSeqNo(), Dict.NONE, context.getActionType(), context.getCostTime(),
+                resp != null ? resp.getRetcode() : Dict.NONE, WatchDog.get(), req,resp);
 
 
     }

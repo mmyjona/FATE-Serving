@@ -3,6 +3,8 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.core.constant.StatusCode;
 import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,10 +46,10 @@ public abstract class HeteroLR extends BaseModel {
         double score = 0;
         for (String key : inputData.keySet()) {
             if (this.weight.containsKey(key)) {
-                 score +=  ((Number)inputData.get(key)).doubleValue() * this.weight.get(key);
-		modelWeightHitCount += 1;
+                score += (double) inputData.get(key) * this.weight.get(key);
+                modelWeightHitCount += 1;
                 inputDataHitCount += 1;
-               // LOGGER.info("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
+                LOGGER.info("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
             }
         }
         score += this.intercept;
@@ -65,13 +67,13 @@ public abstract class HeteroLR extends BaseModel {
         LOGGER.info("input data features hit rate:{}", inputDataHitRate);
 
         Map<String, Double> ret = new HashMap<>();
-        ret.put("score", score);
-        ret.put("modelWrightHitRate", modelWeightHitRate);
-        ret.put("inputDataHitRate", inputDataHitRate);
+        ret.put(Dict.SCORE, score);
+        ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
+        ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
 
         return ret;
     }
 
     @Override
-    public abstract Map<String, Object> predict(Context context , List<Map<String, Object> > inputData, Map<String, Object> predictParams);
+    public abstract Map<String, Object> handlePredict(Context context , List<Map<String, Object> > inputData, FederatedParams predictParams);
 }
