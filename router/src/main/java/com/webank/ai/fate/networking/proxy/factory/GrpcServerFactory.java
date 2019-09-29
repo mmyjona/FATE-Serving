@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.networking.proxy.factory;
 
+import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.webank.ai.fate.networking.proxy.grpc.service.DataTransferPipedServerImpl;
 import com.webank.ai.fate.networking.proxy.grpc.service.RouteServerImpl;
@@ -25,6 +26,7 @@ import com.webank.ai.fate.networking.proxy.service.FdnRouter;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
+import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -53,6 +55,7 @@ import java.net.SocketAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -165,18 +168,42 @@ public class GrpcServerFactory {
             LOGGER.info("running in insecure mode");
         }
 
+        Server  server =serverBuilder.build();
+
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 // Use stderr here since the logger may have been reset by its JVM shutdown hook.
                 System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                this.stop();
+                Properties properties = serverConf.getProperties();
+                boolean useRegister =Boolean.valueOf( properties.getProperty("useRegister","false"));
+
+                if (server != null) {
+                    if (useRegister) {
+                        ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
+                        Set<URL> registered = zookeeperRegistry.getRegistered();
+                        Set<URL> urls = Sets.newHashSet();
+                        urls.addAll(registered);
+                        urls.forEach(url -> {
+                            LOGGER.info("unregister {}", url);
+                            zookeeperRegistry.unregister(url);
+                        });
+                        zookeeperRegistry.destroy();
+                    }
+                    server.shutdown();
+                }
                 System.err.println("*** server shut down");
             }
         });
 
-        return serverBuilder.build();
+        return server;
     }
+
+    private void stop() {
+
+    }
+
+
 
     public Server createServer(String confPath) throws IOException {
         ServerConf serverConf = applicationContext.getBean(ServerConf.class);
