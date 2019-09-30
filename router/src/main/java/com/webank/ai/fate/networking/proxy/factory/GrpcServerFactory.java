@@ -170,32 +170,6 @@ public class GrpcServerFactory {
 
         Server  server =serverBuilder.build();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-                System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                Properties properties = serverConf.getProperties();
-                boolean useRegister =Boolean.valueOf( properties.getProperty("useRegister","false"));
-
-                if (server != null) {
-                    if (useRegister) {
-                        ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-                        Set<URL> registered = zookeeperRegistry.getRegistered();
-                        Set<URL> urls = Sets.newHashSet();
-                        urls.addAll(registered);
-                        urls.forEach(url -> {
-                            LOGGER.info("unregister {}", url);
-                            zookeeperRegistry.unregister(url);
-                        });
-                        zookeeperRegistry.destroy();
-                    }
-                    server.shutdown();
-                }
-                System.err.println("*** server shut down");
-            }
-        });
-
         return server;
     }
 

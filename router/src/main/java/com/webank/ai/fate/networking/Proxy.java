@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.networking;
 
+import com.google.common.collect.Sets;
 import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
@@ -34,11 +35,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 public class Proxy {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static ZookeeperRegistry zookeeperRegistry;
+
+    private static boolean useRegister = false;
 
     public static void main(String[] args) throws Exception {
         Options options = new Options();
@@ -73,7 +77,7 @@ public class Proxy {
 
 
 
-        boolean useRegister =Boolean.valueOf( properties.getProperty("useRegister","false"));
+        useRegister =Boolean.valueOf( properties.getProperty("useRegister","false"));
 
         if(useRegister) {
             String  zkUrl = properties.getProperty("zk.url");
@@ -93,6 +97,22 @@ public class Proxy {
 
  //     System.err.println("caches========"+zookeeperRegistry.getCacheUrls(URL.valueOf("proxy/online/unaryCall")));
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+            System.err.println("*** shutting down gRPC server since JVM is shutting down");
+            if (server != null && useRegister) {
+                Set<URL> registered = zookeeperRegistry.getRegistered();
+                Set<URL> urls = Sets.newHashSet();
+                urls.addAll(registered);
+                urls.forEach(url -> {
+                    LOGGER.info("unregister {}", url);
+                    zookeeperRegistry.unregister(url);
+                });
+                zookeeperRegistry.destroy();
+                server.shutdown();
+            }
+            System.err.println("*** server shut down");
+        }));
 
         server.awaitTermination();
     }
