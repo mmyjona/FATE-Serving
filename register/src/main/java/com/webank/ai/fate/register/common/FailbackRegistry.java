@@ -7,6 +7,9 @@ import com.webank.ai.fate.register.task.*;
 
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.url.UrlUtils;
+import com.webank.ai.fate.register.utils.StringUtils;
+import com.webank.ai.fate.register.utils.URLBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,13 +36,20 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final ConcurrentMap<Holder, FailedNotifiedTask> failedNotified = new ConcurrentHashMap<Holder, FailedNotifiedTask>();
 
-    /**
-     * The time in milliseconds the retryExecutor will wait
-     */
+    private final ConcurrentMap<String,FailedSubProjectTask>  failedSubProject =  new  ConcurrentHashMap<>();
+
+
     private final int retryPeriod;
 
-    // Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
     private final HashedWheelTimer retryTimer;
+
+    public abstract void  doSubProject(String project);
+
+    public  void  subProject(String project){
+        failedSubProject.remove(project);
+        doSubProject(project);
+    }
+
 
     public FailbackRegistry(URL url) {
         super(url);
@@ -57,6 +67,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         failedUnregistered.remove(url);
     }
 
+    public void removeFailedSubscribedProjectTask(String project) {
+
+        failedSubProject.remove(project);
+    }
+
+
     public void removeFailedSubscribedTask(URL url, NotifyListener listener) {
         Holder h = new Holder(url, listener);
         failedSubscribed.remove(h);
@@ -72,6 +88,27 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         failedNotified.remove(h);
     }
 
+    public void addFailedSubscribedProjectTask(String project) {
+
+        failedSubProject.remove(project);
+
+
+        FailedSubProjectTask oldOne = failedSubProject.get(project);
+        if (oldOne != null) {
+            return;
+        }
+       URL  url = URL.valueOf("");
+        URL newUrl = url.setProject(project);
+
+        FailedSubProjectTask newTask = new FailedSubProjectTask(newUrl, this);
+        oldOne = failedSubProject.putIfAbsent(project, newTask);
+        if (oldOne == null) {
+            // never has a retry task. then start a new task for retry.
+            retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
+        }
+    }
+
+
     private void addFailedRegistered(URL url) {
         FailedRegisteredTask oldOne = failedRegistered.get(url);
         if (oldOne != null) {
@@ -84,6 +121,20 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
         }
     }
+
+//    private void addFailedSubProject(String url) {
+//        FailedSubProjectTask oldOne = failedSubProject.get(url);
+//        if (oldOne != null) {
+//            return;
+//        }
+//        FailedSubProjectTask newTask = new FailedSubProjectTask(url, this);
+//        oldOne = failedRegistered.putIfAbsent(url, newTask);
+//        if (oldOne == null) {
+//            // never has a retry task. then start a new task for retry.
+//            retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
+//        }
+//    }
+
 
     private void removeFailedRegistered(URL url) {
         FailedRegisteredTask f = failedRegistered.remove(url);

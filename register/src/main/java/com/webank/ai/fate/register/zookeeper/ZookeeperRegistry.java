@@ -31,7 +31,8 @@ import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 public class ZookeeperRegistry extends FailbackRegistry {
 
 
-    public  void  subProject(String project){
+    @Override
+    public  void  doSubProject(String project){
 
         String  path =  root+Constants.PATH_SEPARATOR+project;
 
@@ -48,12 +49,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 
         subEnvironments(path,project,environments);
-
-
-
-
-
-
 
     }
 
