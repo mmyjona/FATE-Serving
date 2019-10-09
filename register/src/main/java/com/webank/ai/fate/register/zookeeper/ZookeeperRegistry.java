@@ -36,7 +36,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
         String  path =  root+Constants.PATH_SEPARATOR+project;
 
-        System.err.println("subProject path "+path);
 
         List<String>  environments =zkClient.addChildListener(path,(parent,childrens)->{
             if(StringUtils.isNotEmpty(parent)) {
@@ -45,11 +44,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 subEnvironments(path, project, childrens);
             }
         });
-        System.err.println("environments =========="+environments);
-
-
         subEnvironments(path,project,environments);
-
     }
 
     private  void  subEnvironments(String path,String project,List<String>  environments){
@@ -72,11 +67,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     subServices(project, environment, services);
                 }
             }
-
-
     }
-
-
 
 
     private   void  subServices(String project,String environment,List<String>  services){
@@ -123,7 +114,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String hostAddress = localAddress.getHostAddress();
         Preconditions.checkArgument(port!=0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
-        logger.error("register service sets {}",sets);
+        logger.info("register service sets {}",sets);
         for(RegisterService  service:sets){
             URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
             if(service.useDynamicEnvironment()){
@@ -148,8 +139,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
             return null;
         }
         URL registryUrl = URL.valueOf(url);
-
-
         registryUrl=registryUrl.addParameter(Constants.ENVIRONMENT_KEY,environment);
         registryUrl=registryUrl.addParameter(Constants.SERVER_PORT,port);
         registryUrl=registryUrl.addParameter(Constants.PROJECT_KEY,project);
@@ -427,7 +416,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
             List<String> providers = new ArrayList<>();
             for (String path : toCategoriesPath(url)) {
-                System.err.println("path "+path);
                 List<String> children = zkClient.getChildren(path);
                 if (children != null) {
                     providers.addAll(children);
@@ -461,7 +449,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
 
         String  result = toRootDir() +project+ Constants.PATH_SEPARATOR+environment+Constants.PATH_SEPARATOR+ URL.encode(name);
-//        logger.info("toServicePath return {}",result);
         return result;
 
     }

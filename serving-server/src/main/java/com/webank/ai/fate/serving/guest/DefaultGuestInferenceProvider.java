@@ -319,9 +319,7 @@ public class DefaultGuestInferenceProvider  implements GuestInferenceProvider  ,
     @Override
     public ReturnResult asynInference(Context context, InferenceRequest inferenceRequest) {
         long  beginTime= System.currentTimeMillis();
-
         ReturnResult  cacheResult = getReturnResultFromCache(context,inferenceRequest);
-
         if(cacheResult!=null) {
             return cacheResult;
         }
@@ -332,20 +330,19 @@ public class DefaultGuestInferenceProvider  implements GuestInferenceProvider  ,
                 ReturnResult inferenceResult=null;
                 Context subContext = context.subContext();
                 subContext.preProcess();
-
                 try {
-
                     subContext.setActionType(Dict.ACTION_TYPE_ASYNC_EXECUTE);
                     inferenceResult=   runInference(subContext,inferenceRequest);
                     if (inferenceResult!=null&&inferenceResult.getRetcode() == 0) {
                         cacheManager.putInferenceResultCache(subContext ,inferenceRequest.getAppid(), inferenceRequest.getCaseid(), inferenceResult);
                     }
-                }finally {
-
+                }catch(Throwable e){
+                    LOGGER.error("asynInference error",e);
+                }
+                finally {
                     subContext.postProcess(inferenceRequest,inferenceResult);
                 }
             }
-
         });
         ReturnResult startInferenceJobResult = new ReturnResult();
         startInferenceJobResult.setRetcode(InferenceRetCode.OK);

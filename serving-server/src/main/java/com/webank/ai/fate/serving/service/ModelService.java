@@ -147,8 +147,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             if(returnResult.getRetcode()==0){
-                String key = Md5Crypt.md5Crypt(req.toByteArray());
-                publicOnlineReqMap.put(key, new String(Base64.encode(req.toByteArray())));
+
+                String content = new String(Base64.encode(req.toByteArray()));
+                String key = Md5Crypt.md5Crypt(content.getBytes());
+
+                publicOnlineReqMap.put(key, content);
                 fireStoreEvent();
             }
             responseStreamObserver.onNext(builder.build());
@@ -185,9 +188,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     public void doSaveProperties(Map  properties,File  file ,long version) {
         logger.info("prepare to save modelinfo {} {}",file,properties);
 
-//        if (version < lastCacheChanged.get()) {
-//            return;
-//        }
         if (file == null) {
             return;
         }
@@ -203,7 +203,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 if (lock == null) {
                     throw new IOException("Can not lock the registry cache file " + file.getAbsolutePath() + ", ignore and retry later, maybe multi java process use the file");
                 }
-                // Save
                 try {
                     if (!file.exists()) {
                         file.createNewFile();
@@ -248,7 +247,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //            } else {
 //                registryCacheExecutor.execute(new AbstractRegistry.SaveProperties(lastCacheChanged.incrementAndGet()));
 //            }
-            logger.warn("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
+            logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
         }
     }
 
@@ -259,8 +258,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             InputStream in = null;
             try {
                 in = new FileInputStream(file);
-
-
                     //properties.load(in);
                     try(BufferedReader  bufferedReader =  new BufferedReader(new InputStreamReader(in))) {
 
@@ -272,7 +269,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                                 String value = temp.substring(index + 1);
                                 properties.put(key, value);
                             }
-
                         });
                     }
 
@@ -314,6 +310,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                         ModelUtils.getFederatedRoles(req.getRoleMap()),
                         ModelUtils.getFederatedRolesModel(req.getModelMap()));
             } catch (Exception e) {
+                logger.error("restore publishLoadModel error",e);
                 e.printStackTrace();
             }
         });
@@ -328,6 +325,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                         ModelUtils.getFederatedRoles(req.getRoleMap()),
                         ModelUtils.getFederatedRolesModel(req.getModelMap()));
             } catch (Exception e) {
+                logger.error("restore publishOnlineModel error",e);
                 e.printStackTrace();
             }
 
