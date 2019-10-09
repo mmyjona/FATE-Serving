@@ -81,7 +81,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
         if (input.containsKey(fidStr)) {
-            if (Double.parseDouble(input.get(fidStr).toString()) < splitValue) {
+            if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
             } else {
                 nextTreeNodeId =  this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
