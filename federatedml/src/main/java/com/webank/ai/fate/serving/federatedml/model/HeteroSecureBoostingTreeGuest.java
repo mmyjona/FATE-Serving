@@ -45,7 +45,7 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
         ArrayList<Double> scores = new ArrayList<Double>();
         for (int i = 0; i < n; ++i) {
-            scores.add(Math.exp(weights[i]) / denominator);
+            scores.add(Math.exp(weights[i] - min) / denominator);
         }
 
         Map<String, Object> ret= Maps.newHashMap();
