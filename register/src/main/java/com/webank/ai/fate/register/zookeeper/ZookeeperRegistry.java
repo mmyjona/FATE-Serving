@@ -2,6 +2,7 @@ package com.webank.ai.fate.register.zookeeper;
 
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.common.*;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
@@ -105,8 +106,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
         return  key;
     }
 
-
-    public  void  register(Set<RegisterService> sets){
+    Set<String>  registedString = Sets.newHashSet();
+    public synchronized void   register(Set<RegisterService> sets){
         InetAddress localAddress = NetUtils.getLocalAddress();
         String hostAddress = localAddress.getHostAddress();
         Preconditions.checkArgument(port!=0);
@@ -120,8 +121,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 if(CollectionUtils.isNotEmpty(dynamicEnvironments)){
                     dynamicEnvironments.forEach(environment->{
                         URL  newServiceUrl= serviceUrl.setEnvironment(environment);
-                        if(!registered.contains(newServiceUrl)) {
+                        String serviceName = service.serviceName()+environment;
+
+                        if(!registedString.contains(serviceName)) {
                             this.register(newServiceUrl);
+                            this.registedString.add(serviceName);
                         }else{
                             logger.info("url {} is already registed,will not do anything ",newServiceUrl);
                         }
@@ -129,11 +133,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 }
             }
             else{
-                this.register(serviceUrl);
+                if(!registedString.contains(service.serviceName())) {
+                    this.register(serviceUrl);
+                    this.registedString.add(service.serviceName());
+                }
             }
         }
         logger.info("registed urls {}",registered);
-
     }
 
 

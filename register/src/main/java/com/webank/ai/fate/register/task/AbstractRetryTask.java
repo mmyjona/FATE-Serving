@@ -102,7 +102,7 @@ public abstract class AbstractRetryTask implements TimerTask {
         }
         if (times > retryTimes) {
             // reach the most times of retry.
-            logger.warn("Final failed to execute task " + taskName + ", url: " + url + ", retry " + retryTimes + " times.");
+            logger.error("Final failed to execute task " + taskName + ", url: " + url + ", retry " + retryTimes + " times.");
             return;
         }
         if (logger.isInfoEnabled()) {
@@ -111,7 +111,7 @@ public abstract class AbstractRetryTask implements TimerTask {
         try {
             doRetry(url, registry, timeout);
         } catch (Throwable t) { // Ignore all the exceptions and wait for the next retry
-            logger.warn("Failed to execute task " + taskName + ", url: " + url + ", waiting for again, cause:" + t.getMessage(), t);
+            logger.error("Failed to execute task " + taskName + ", url: " + url + ", waiting for again, cause:" + t.getMessage(), t);
             // reput this task when catch exception.
             reput(timeout, retryPeriod);
         }finally{
