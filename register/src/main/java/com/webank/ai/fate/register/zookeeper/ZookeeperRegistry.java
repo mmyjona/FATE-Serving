@@ -100,12 +100,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
         boolean  appendParam =  false;
         if (StringUtils.isNotEmpty(version)) {
             param = param + "&" + Constants.VERSION + "=" + version;
-
         }
         key= key+ param;
         return  key;
-
-
     }
 
 
@@ -115,9 +112,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
         Preconditions.checkArgument(port!=0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
         logger.info("register service sets {}",sets);
+        Set<URL> registered =this.getRegistered();
         for(RegisterService  service:sets){
             URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
-            Set<URL> registered =this.getRegistered();
             if(service.useDynamicEnvironment()){
 
                 if(CollectionUtils.isNotEmpty(dynamicEnvironments)){
@@ -135,6 +132,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 this.register(serviceUrl);
             }
         }
+        logger.info("registed urls {}",registered);
+
     }
 
 
@@ -200,7 +199,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         zkClient.addStateListener(state -> {
 
             if (state == StateListener.RECONNECTED) {
-                logger.error("==========state listenner reconnected");
+                logger.error("state listenner reconnected");
                 try {
                     recover();
                 } catch (Exception e) {
