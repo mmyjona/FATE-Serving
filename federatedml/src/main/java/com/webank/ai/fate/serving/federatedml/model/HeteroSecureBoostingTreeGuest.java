@@ -28,24 +28,25 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
     private Map<String, Object> softmax(double weights[]) {
         int n = weights.length;
-        double min = weights[0];
+        double max = weights[0];
         int maxIndex = 0;
         double denominator = 0.0;
         for (int i = 1; i < n; ++i) {
             if (weights[i] > weights[maxIndex]) {
                 maxIndex = i;
+                max = weights[i];
             }
-            min = Math.min(min, weights[i]);
             // denominator += Math.exp(weights[i] - min);
         }
 
         for (int i = 0; i < n; i++) {
-            denominator += Math.exp(weights[i] - min);
+            weights[i] = Math.exp(weights[i] - max);
+            denominator += weights[i];
         }
 
         ArrayList<Double> scores = new ArrayList<Double>();
         for (int i = 0; i < n; ++i) {
-            scores.add(Math.exp(weights[i] - min) / denominator);
+            scores.add(weights[i]/ denominator);
         }
 
         Map<String, Object> ret= Maps.newHashMap();
