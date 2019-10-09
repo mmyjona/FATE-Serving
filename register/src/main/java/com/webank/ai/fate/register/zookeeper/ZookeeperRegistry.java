@@ -117,18 +117,23 @@ public class ZookeeperRegistry extends FailbackRegistry {
         logger.info("register service sets {}",sets);
         for(RegisterService  service:sets){
             URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+            Set<URL> registered =this.getRegistered();
             if(service.useDynamicEnvironment()){
+
                 if(CollectionUtils.isNotEmpty(dynamicEnvironments)){
                     dynamicEnvironments.forEach(environment->{
                         URL  newServiceUrl= serviceUrl.setEnvironment(environment);
-                        this.register(newServiceUrl);
+                        if(!registered.contains(newServiceUrl)) {
+                            this.register(newServiceUrl);
+                        }else{
+                            logger.info("url {} is already registed,will not do anything ",newServiceUrl);
+                        }
                     });
                 }
             }
             else{
                 this.register(serviceUrl);
             }
-
         }
     }
 

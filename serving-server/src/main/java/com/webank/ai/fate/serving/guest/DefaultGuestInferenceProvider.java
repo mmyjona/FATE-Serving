@@ -311,9 +311,6 @@ public class DefaultGuestInferenceProvider  implements GuestInferenceProvider  ,
 
         }
         return inferenceResultFromCache;
-
-
-
     }
 
     @Override

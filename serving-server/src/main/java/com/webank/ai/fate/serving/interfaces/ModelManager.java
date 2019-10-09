@@ -26,9 +26,7 @@ public interface ModelManager {
 
     public  PipelineTask pushModelIntoPool(String name, String namespace);
 
-    public void  store();
 
-    public void  restore();
 
 
 }
