@@ -2,6 +2,7 @@ package com.webank.ai.fate.register.common;
 
 
 
+import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.interfaces.Registry;
 
@@ -63,6 +64,15 @@ public abstract class AbstractRegistry implements Registry {
     private URL registryUrl;
     // Local disk cache file
     private File file;
+
+    protected  Set<String>  projectSets = Sets.newHashSet();
+
+    public  void  subProject(String project){
+        projectSets.add(project);
+
+    }
+
+    public abstract void  doSubProject(String project);
 
     public AbstractRegistry(URL url) {
         setUrl(url);
@@ -305,6 +315,13 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     protected void recover() throws Exception {
+
+
+       for(String  project:this.projectSets){
+           logger.info("Recover project {} " ,project);
+            subProject(project);
+       }
+
         // register
         Set<URL> recoverRegistered = new HashSet<>(getRegistered());
         if (!recoverRegistered.isEmpty()) {

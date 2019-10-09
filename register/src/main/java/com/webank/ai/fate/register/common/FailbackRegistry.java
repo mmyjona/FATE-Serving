@@ -43,9 +43,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final HashedWheelTimer retryTimer;
 
-    public abstract void  doSubProject(String project);
 
+
+    @Override
     public  void  subProject(String project){
+        super.subProject(project);
         failedSubProject.remove(project);
         doSubProject(project);
     }
