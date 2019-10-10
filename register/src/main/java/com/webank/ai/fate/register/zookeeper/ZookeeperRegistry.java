@@ -112,8 +112,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     Set<String>  registedString = Sets.newHashSet();
     public synchronized void   register(Set<RegisterService> sets){
-        InetAddress localAddress = NetUtils.getLocalAddress();
-        String hostAddress = localAddress.getHostAddress();
+
+        String hostAddress = NetUtils.getLocalIp();
         Preconditions.checkArgument(port!=0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
 
@@ -274,13 +274,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 ChildListener zkListener = listeners.get(listener);
                 if (zkListener == null) {
                     listeners.putIfAbsent(listener, (parentPath, currentChilds) -> {
-
-
-                        System.err.println("parentPath =========="+parentPath);
-                        System.err.println("currentChilds ============="+currentChilds);
-
-
-
 
                         if(parentPath.equals(Constants.PROVIDERS_CATEGORY)){
                             for (String child : currentChilds) {

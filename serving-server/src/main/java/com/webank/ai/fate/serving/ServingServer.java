@@ -98,22 +98,22 @@ public class ServingServer implements InitializingBean{
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             //zookeeperRegistry.addDynamicEnvironment("10001");
             BaseModel.routerService =  applicationContext.getBean(RouterService.class);
-
             FateServer.serviceSets.forEach(servie->{
-
-                String  serviceName = servie.serviceName();
-               String weightKey = serviceName+".weight";
-                HashMap properties = Configuration.getProperties();
-                        if(properties.get(weightKey)!=null) {
-                            int weight = Integer.valueOf( properties.get(weightKey).toString());
-
-                            if (weight > 0) {
-                                zookeeperRegistry.getServieWeightMap().put(weightKey, weight);
-                            }
+                try {
+                    String serviceName = servie.serviceName();
+                    String weightKey = serviceName + ".weight";
+                    HashMap properties = Configuration.getProperties();
+                    if (properties.get(weightKey) != null) {
+                        int weight = Integer.valueOf(properties.get(weightKey).toString());
+                        if (weight > 0) {
+                            zookeeperRegistry.getServieWeightMap().put(weightKey, weight);
                         }
+                    }
+                }catch(Throwable e){
+                    LOGGER.error("parse interface weight error",e);
+                }
 
             });
-
             zookeeperRegistry.register(FateServer.serviceSets);
         }
 
@@ -131,13 +131,10 @@ public class ServingServer implements InitializingBean{
     private void stop() {
         if (server != null) {
             if (useRegister) {
-
                 ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
                 Set<URL> registered = zookeeperRegistry.getRegistered();
-
                 Set<URL> urls = Sets.newHashSet();
                 urls.addAll(registered);
-
                 urls.forEach(url -> {
                     LOGGER.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
@@ -155,10 +152,7 @@ public class ServingServer implements InitializingBean{
         }
     }
 
-
     private void initialize() {
-
-        //new ModelManager();
         this.initializeClientPool();
         HttpClientPool.initPool();
         InferenceWorkerManager.prestartAllCoreThreads();

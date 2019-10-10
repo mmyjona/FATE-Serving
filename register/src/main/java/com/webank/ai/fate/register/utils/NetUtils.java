@@ -190,7 +190,7 @@ public class NetUtils {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
-        InetAddress localAddress = getLocalAddress0();
+        InetAddress localAddress = getLocalAddress0("eth0");
         LOCAL_ADDRESS = localAddress;
         return localAddress;
     }
@@ -208,7 +208,66 @@ public class NetUtils {
         return Optional.empty();
     }
 
-    private static InetAddress getLocalAddress0() {
+
+    public static String getLocalIp() {
+
+        String sysType = System.getProperties().getProperty("os.name");
+        String ip;
+
+        try {
+            if (sysType.toLowerCase().startsWith("win")) {
+                String localIP = null;
+
+                localIP = InetAddress.getLocalHost().getHostAddress();
+
+                if (localIP != null) {
+                    return localIP;
+                }
+            } else {
+                ip = getIpByEthNum("eth0");
+                if (ip != null) {
+                    return ip;
+
+
+                }
+            }
+        } catch (Throwable  e) {
+            logger.error(e.getMessage(), e);
+        }
+        return "";
+    }
+
+    private static String getIpByEthNum(String ethNum) {
+        try {
+            Enumeration allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
+            while (allNetInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+                if (ethNum.equals(netInterface.getName())) {
+                    Enumeration addresses = netInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        ip = (InetAddress) addresses.nextElement();
+                        if (ip != null && ip instanceof Inet4Address) {
+                            return ip.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return "";
+    }
+
+
+    public static String getOsName() {
+
+        String osName = System.getProperty("os.name");
+        return osName;
+    }
+
+
+    private static InetAddress getLocalAddress0(String  name) {
         InetAddress localAddress = null;
         try {
             localAddress = InetAddress.getLocalHost();
@@ -230,6 +289,11 @@ public class NetUtils {
                     NetworkInterface network = interfaces.nextElement();
                     if (network.isLoopback() || network.isVirtual() || !network.isUp()) {
                         continue;
+                    }
+                    if(StringUtils.isNotEmpty(name)) {
+                        if (!network.getName().equals(name)) {
+                            continue;
+                        }
                     }
                     Enumeration<InetAddress> addresses = network.getInetAddresses();
                     while (addresses.hasMoreElements()) {
