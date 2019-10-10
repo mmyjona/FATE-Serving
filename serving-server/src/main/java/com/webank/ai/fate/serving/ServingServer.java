@@ -43,6 +43,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -102,11 +103,14 @@ public class ServingServer implements InitializingBean{
 
                 String  serviceName = servie.serviceName();
                String weightKey = serviceName+".weight";
-                int  weight = Configuration.getPropertyInt(weightKey);
+                HashMap properties = Configuration.getProperties();
+                        if(properties.get(weightKey)!=null) {
+                            int weight = Integer.valueOf( properties.get(weightKey).toString());
 
-                if(weight>0){
-                    zookeeperRegistry.getServieWeightMap().put(weightKey,weight);
-                }
+                            if (weight > 0) {
+                                zookeeperRegistry.getServieWeightMap().put(weightKey, weight);
+                            }
+                        }
 
             });
 

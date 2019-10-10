@@ -116,7 +116,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String hostAddress = localAddress.getHostAddress();
         Preconditions.checkArgument(port!=0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
-        logger.info("register service sets {}",sets);
+
         Set<URL> registered =this.getRegistered();
         for(RegisterService  service:sets){
             URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
