@@ -450,12 +450,27 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String project = url.getProject()!=null?url.getProject():this.project;
         String environment =  url.getEnvironment()!=null?url.getEnvironment():this.environment;
         String name = url.getServiceInterface();
+
+        String protocol = url.getProtocol();
         if (ANY_VALUE.equals(name)) {
             return toRootPath();
         }
 
-        String  result = toRootDir() +project+ Constants.PATH_SEPARATOR+environment+Constants.PATH_SEPARATOR+ URL.encode(name);
-        return result;
+        StringBuilder builder = new StringBuilder(toRootDir());
+        if (StringUtils.isNotEmpty(project)) {
+            builder.append(project+ Constants.PATH_SEPARATOR);
+        }
+        if (StringUtils.isNotEmpty(environment)) {
+            builder.append(environment+ Constants.PATH_SEPARATOR);
+        }
+        // for jmx url
+        if (protocol.equalsIgnoreCase(JMX_PROTOCOL_KEY)) {
+            builder.append(PATH_JMX);
+        } else {
+            builder.append(URL.encode(name));
+        }
+//        String  result = toRootDir() +project+ Constants.PATH_SEPARATOR+environment+Constants.PATH_SEPARATOR+ URL.encode(name);
+        return builder.toString();
 
     }
 

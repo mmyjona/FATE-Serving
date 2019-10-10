@@ -39,6 +39,10 @@ public interface Constants {
 
     public  static String  PATH_KEY="path";
 
+    public  static String  PATH_JMX = "jmx";
+
+    public  static String  JMX_PROTOCOL_KEY = "service:jmx:rmi:///jndi/rmi";
+
     String PROVIDER = "com/webank/ai/fate/register/provider";
 
     String CONSUMER = "consumer";

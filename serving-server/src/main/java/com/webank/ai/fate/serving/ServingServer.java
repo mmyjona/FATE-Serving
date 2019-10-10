@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.core.network.grpc.client.GrpcClientPool;
 import com.webank.ai.fate.core.utils.Configuration;
+import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.router.RouterService;
@@ -42,6 +43,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -115,6 +117,17 @@ public class ServingServer implements InitializingBean{
 
             });
             zookeeperRegistry.register(FateServer.serviceSets);
+
+            boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
+            if (useJMX) {
+                String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");
+                FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
+                String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName);
+                // service:jmx:rmi:///jndi/rmi://10.56.224.80:9999/serving
+//            /FATE-SERVICES/jmx/providers/service:jmx:rmi:///jndi/rmi://10.56.224.80:9999/serving
+                URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
+                zookeeperRegistry.register(jmxUrl);
+            }
         }
 
 

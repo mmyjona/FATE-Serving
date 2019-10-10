@@ -54,7 +54,7 @@ public class FateMBeanServer {
         LOGGER.info("Server registerMBean {}", objectName);
     }
 
-    public void openJMXServer(String serverName) throws IOException {
+    public String openJMXServer(String serverName) throws IOException {
         int port = Integer.valueOf(System.getProperty("jmx.port", "9999"));
         LocateRegistry.createRegistry(port);
         String url = "service:jmx:rmi:///jndi/rmi://" + IpAddressUtil.getInnetIp() + ":" + port + "/" + serverName;
@@ -63,6 +63,7 @@ public class FateMBeanServer {
         jmxConnectorServer.start();
 
         LOGGER.info("JMX Server started listening on port: {}, url: {}", port, url);
+        return url;
     }
 
     public void stopJMXServer() throws IOException {

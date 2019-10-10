@@ -1578,5 +1578,53 @@ class URL implements Serializable {
 
     }
 
+    public static URL parseJMXServiceUrl(String url) {
+        if (url == null || (url = url.trim()).length() == 0) {
+            throw new IllegalArgumentException("url == null");
+        }
+        String protocol = null;
+        String project = "";
+        String environment = "";
+        String host = null;
+        int port = 0;
+        String path = null;
+
+        int i = url.lastIndexOf("://");
+        if (i >= 0) {
+            if (i == 0) {
+                throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            }
+            protocol = url.substring(0, i);
+            url = url.substring(i + 3);
+        } else {
+            i = url.indexOf(":/");
+            if (i >= 0) {
+                if (i == 0) {
+                    throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+                }
+                protocol = url.substring(0, i);
+                url = url.substring(i + 1);
+            }
+        }
+
+        i = url.lastIndexOf("/");
+        if (i >= 0) {
+            path = url.substring(i + 1);
+            url = url.substring(0, i);
+        }
+
+        i = url.lastIndexOf(":");
+        if (i >= 0 && i < url.length() - 1) {
+            int x = url.indexOf("/");
+            if(x>0) {
+                port = Integer.parseInt(url.substring(i + 1, x));
+            }else{
+                port = Integer.parseInt(url.substring(i + 1));
+            }
+            host = url.substring(0, i);
+        }
+
+        return new URL(protocol, project, environment, host, port, path, new HashMap<>());
+    }
 
 }
