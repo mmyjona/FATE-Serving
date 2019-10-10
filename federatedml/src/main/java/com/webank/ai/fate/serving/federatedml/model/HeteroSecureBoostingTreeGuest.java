@@ -154,9 +154,9 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 if (this.isLocateInLeaf(i, treeNodeIds[i])) {
                     continue;
                 }
-                int nodeId = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
-                if (!this.isLocateInLeaf(i, nodeId)) {
-                    treeLocation.put(String.valueOf(i), nodeId);
+                treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
+                if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
+                    treeLocation.put(String.valueOf(i), treeNodeIds[i]);
                 }
             }
             if (treeLocation.size() == 0) {
