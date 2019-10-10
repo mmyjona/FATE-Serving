@@ -2,6 +2,7 @@ package com.webank.ai.fate.register.common;
 
 
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.interfaces.Registry;
@@ -37,6 +38,19 @@ public abstract class AbstractRegistry implements Registry {
 
 
     private static final Logger logger = LogManager.getLogger(AbstractRegistry.class);
+
+
+    public Map<String, Integer> getServieWeightMap() {
+        return servieWeightMap;
+    }
+
+    public void setServieWeightMap(Map<String, Integer> servieWeightMap) {
+        this.servieWeightMap = servieWeightMap;
+    }
+
+    protected  Map<String,Integer>  servieWeightMap = Maps.newHashMap();
+
+
 
 
     private static final char URL_SEPARATOR = ' ';

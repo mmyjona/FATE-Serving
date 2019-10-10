@@ -102,6 +102,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (StringUtils.isNotEmpty(version)) {
             param = param + "&" + Constants.VERSION + "=" + version;
         }
+        if(this.getServieWeightMap().containsKey(serviceName+".weight")){
+            int weight = this.getServieWeightMap().get(serviceName+".weight");
+            param = param + "&" + Constants.WEIGHT_KEY + "=" + weight;
+        }
         key= key+ param;
         return  key;
     }
@@ -122,7 +126,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     dynamicEnvironments.forEach(environment->{
                         URL  newServiceUrl= serviceUrl.setEnvironment(environment);
                         String serviceName = service.serviceName()+environment;
-
                         if(!registedString.contains(serviceName)) {
                             this.register(newServiceUrl);
                             this.registedString.add(serviceName);

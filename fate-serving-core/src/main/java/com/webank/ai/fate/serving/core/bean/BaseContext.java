@@ -45,8 +45,7 @@ public class BaseContext<Req ,Resp extends ReturnResult> implements Context<Req,
     @Override
     public void preProcess() {
 
-
-        WatchDog.enter(this);
+        //WatchDog.enter(this);
 
     }
 
@@ -94,7 +93,7 @@ public class BaseContext<Req ,Resp extends ReturnResult> implements Context<Req,
 
         try {
 
-            WatchDog.quit(this);
+        //    WatchDog.quit(this);
 
             if(loggerPrinter!=null){
                 loggerPrinter.printLog(this,req,resp);

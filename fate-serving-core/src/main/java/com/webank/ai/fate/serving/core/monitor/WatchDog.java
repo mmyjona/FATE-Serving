@@ -16,7 +16,7 @@ public class WatchDog {
 
     private static ConcurrentHashMap<String, AtomicLong> SERVICE_PROCESS_COUNT_MAP = new ConcurrentHashMap<String, AtomicLong>();
 
-    private static final int MAX_PROCESS_COUNT = 10;
+    private static final int MAX_PROCESS_COUNT = 100000;
 
     public  static void  enter(Context context){
         RPC_IN_PROCESS.addAndGet(1);
@@ -35,9 +35,6 @@ public class WatchDog {
             if (SERVICE_PROCESS_COUNT_MAP.get(serviceName) == null) {
                 SERVICE_PROCESS_COUNT_MAP.putIfAbsent(serviceName, new AtomicLong(1));
             } else {
-                if ((SERVICE_PROCESS_COUNT_MAP.get(serviceName).intValue() + 1) > MAX_PROCESS_COUNT) {
-                    throw new RuntimeException("too many in process");
-                }
                 SERVICE_PROCESS_COUNT_MAP.get(serviceName).incrementAndGet();
             }
             // update in process

@@ -90,15 +90,26 @@ public class ServingServer implements InitializingBean{
         server.start();
 
         String  userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
-
         useRegister = Boolean.valueOf(userRegisterString);
-
         if(useRegister) {
 
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             //zookeeperRegistry.addDynamicEnvironment("10001");
             BaseModel.routerService =  applicationContext.getBean(RouterService.class);
+
+            FateServer.serviceSets.forEach(servie->{
+
+                String  serviceName = servie.serviceName();
+               String weightKey = serviceName+".weight";
+                int  weight = Configuration.getPropertyInt(weightKey);
+
+                if(weight>0){
+                    zookeeperRegistry.getServieWeightMap().put(weightKey,weight);
+                }
+
+            });
+
             zookeeperRegistry.register(FateServer.serviceSets);
         }
 
