@@ -464,7 +464,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             builder.append(environment+ Constants.PATH_SEPARATOR);
         }
         // for jmx url
-        if (protocol.equalsIgnoreCase(JMX_PROTOCOL_KEY)) {
+        if (StringUtils.isNotEmpty(protocol)&&protocol.equalsIgnoreCase(JMX_PROTOCOL_KEY)) {
             builder.append(PATH_JMX);
         } else {
             builder.append(URL.encode(name));
