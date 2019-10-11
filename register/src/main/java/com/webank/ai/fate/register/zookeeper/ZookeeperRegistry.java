@@ -45,6 +45,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 subEnvironments(path, project, childrens);
             }
         });
+        logger.info("11111111=============== environments {}",environments);
         subEnvironments(path,project,environments);
     }
 
@@ -54,9 +55,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
                 for (String environment : environments) {
 
-                    path = path + Constants.PATH_SEPARATOR + environment;
+                    String  tempPath = path + Constants.PATH_SEPARATOR + environment;
 
-                    List<String> services = zkClient.addChildListener(path, (parent, childrens) -> {
+                    logger.info("=============path {}",tempPath);
+
+                    List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
 
                         if(StringUtils.isNotEmpty(parent)) {
                             logger.info("fire services changes {}", childrens);
@@ -65,6 +68,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
                         }
 
                     });
+
+                    logger.info("=============== services {}",services);
                     subServices(project, environment, services);
                 }
             }
@@ -450,28 +455,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String project = url.getProject()!=null?url.getProject():this.project;
         String environment =  url.getEnvironment()!=null?url.getEnvironment():this.environment;
         String name = url.getServiceInterface();
-
-        String protocol = url.getProtocol();
         if (ANY_VALUE.equals(name)) {
             return toRootPath();
         }
 
-        StringBuilder builder = new StringBuilder(toRootDir());
-        if (StringUtils.isNotEmpty(project)) {
-            builder.append(project+ Constants.PATH_SEPARATOR);
-        }
-        if (StringUtils.isNotEmpty(environment)) {
-            builder.append(environment+ Constants.PATH_SEPARATOR);
-        }
-        // for jmx url
-        if (StringUtils.isNotEmpty(protocol)&&protocol.equalsIgnoreCase(JMX_PROTOCOL_KEY)) {
-            builder.append(PATH_JMX);
-        } else {
-            builder.append(URL.encode(name));
-        }
-//        String  result = toRootDir() +project+ Constants.PATH_SEPARATOR+environment+Constants.PATH_SEPARATOR+ URL.encode(name);
-        return builder.toString();
-
+        String  result = toRootDir() +project+ Constants.PATH_SEPARATOR+environment+Constants.PATH_SEPARATOR+ URL.encode(name);
+        return result;
     }
 
     private String[] toCategoriesPath(URL url) {
@@ -505,7 +494,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
             for (String provider : providers) {
                 provider = URL.decode(provider);
                 if (provider.contains(PROTOCOL_SEPARATOR)) {
-                    URL url = URL.valueOf(provider);
+                    URL url;
+                    // for jmx url
+                    if (provider.startsWith(JMX_PROTOCOL_KEY)) {
+                        url = URL.parseJMXServiceUrl(provider);
+                    } else {
+                        url = URL.valueOf(provider);
+                    }
                     if (UrlUtils.isMatch(consumer, url)) {
                         urls.add(url);
                     }
