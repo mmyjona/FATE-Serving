@@ -61,7 +61,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 subEnvironments(path, project, childrens);
             }
         });
-        logger.info("11111111=============== environments {}",environments);
+        logger.info("environments {}",environments);
         subEnvironments(path,project,environments);
     }
 
@@ -73,7 +73,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
                     String  tempPath = path + Constants.PATH_SEPARATOR + environment;
 
-                    logger.info("=============path {}",tempPath);
+
 
                     List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
 
@@ -85,7 +85,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
                     });
 
-                    logger.info("=============== services {}",services);
+
                     subServices(project, environment, services);
                 }
             }
