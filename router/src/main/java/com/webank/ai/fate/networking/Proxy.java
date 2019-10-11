@@ -109,8 +109,13 @@ public class Proxy {
                     zookeeperRegistry.unregister(url);
                 });
                 zookeeperRegistry.destroy();
-                server.shutdown();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            server.shutdown();
             System.err.println("*** server shut down");
         }));
 

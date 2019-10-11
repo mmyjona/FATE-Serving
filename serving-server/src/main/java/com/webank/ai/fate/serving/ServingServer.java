@@ -154,6 +154,11 @@ public class ServingServer implements InitializingBean{
                 });
 
                 zookeeperRegistry.destroy();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             server.shutdown();
         }
