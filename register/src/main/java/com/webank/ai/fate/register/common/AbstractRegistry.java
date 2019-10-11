@@ -238,7 +238,12 @@ public abstract class AbstractRegistry implements Registry {
                 String[] arr = value.trim().split(URL_SPLIT);
                 List<URL> urls = new ArrayList<>();
                 for (String u : arr) {
-                    urls.add(URL.valueOf(u));
+                    // for jmx url
+                    if (u.startsWith(JMX_PROTOCOL_KEY)) {
+                        urls.add(URL.parseJMXServiceUrl(u));
+                    } else {
+                        urls.add(URL.valueOf(u));
+                    }
                 }
                 return urls;
             }

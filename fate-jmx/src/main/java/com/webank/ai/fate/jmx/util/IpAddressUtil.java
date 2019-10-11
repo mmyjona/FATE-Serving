@@ -8,12 +8,12 @@ import java.util.Enumeration;
 public class IpAddressUtil {
 
     public static String getInnetIp() throws SocketException {
-        String localip = null;// 本地IP，如果没有配置外网IP则返回它
-        String netip = null;// 外网IP
+        String localip = null;
+        String netip = null;
         Enumeration<NetworkInterface> netInterfaces;
         netInterfaces = NetworkInterface.getNetworkInterfaces();
-        InetAddress ip = null;
-        boolean finded = false;// 是否找到外网IP
+        InetAddress ip;
+        boolean finded = false;
         while (netInterfaces.hasMoreElements() && !finded) {
             NetworkInterface ni = netInterfaces.nextElement();
             Enumeration<InetAddress> address = ni.getInetAddresses();
@@ -21,13 +21,13 @@ public class IpAddressUtil {
                 ip = address.nextElement();
                 if (!ip.isSiteLocalAddress()
                         && !ip.isLoopbackAddress()
-                        && ip.getHostAddress().indexOf(":") == -1) {// 外网IP
+                        && ip.getHostAddress().indexOf(":") == -1) {
                     netip = ip.getHostAddress();
                     finded = true;
                     break;
                 } else if (ip.isSiteLocalAddress()
                         && !ip.isLoopbackAddress()
-                        && ip.getHostAddress().indexOf(":") == -1) {// 内网IP
+                        && ip.getHostAddress().indexOf(":") == -1) {
                     localip = ip.getHostAddress();
                 }
             }

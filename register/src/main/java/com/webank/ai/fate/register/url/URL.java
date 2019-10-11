@@ -1583,12 +1583,13 @@ class URL implements Serializable {
             throw new IllegalArgumentException("url == null");
         }
         String protocol = null;
-        String project = "";
-        String environment = "";
+        String project = null;
+        String environment = null;
         String host = null;
         int port = 0;
         String path = null;
 
+        // diffent
         int i = url.lastIndexOf("://");
         if (i >= 0) {
             if (i == 0) {
