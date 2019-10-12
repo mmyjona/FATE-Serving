@@ -48,6 +48,8 @@ public class DefaultRouterService  extends  AbstractRouterService {
 
         List<URL>  resultUrls = this.loadBalancer.select(urls);
 
+        logger.info("router service return urls {}",resultUrls);
+
         return  resultUrls;
 
 

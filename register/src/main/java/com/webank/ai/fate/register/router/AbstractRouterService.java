@@ -28,6 +28,8 @@ import com.webank.ai.fate.register.loadbalance.LoadBalancerFactory;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.utils.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.List;
 public abstract  class AbstractRouterService  implements RouterService {
 
 
+    Logger logger = LogManager.getLogger();
 
     protected LoadBalancerFactory   loadBalancerFactory=new DefaultLoadBalancerFactory();
 
