@@ -64,6 +64,7 @@ public class HeteroFeatureBinning extends BaseModel {
 		}
 
         for (String colName : firstData.keySet()) {
+		    try{
             List<Double> splitPoint = this.splitPoints.get(colName);
             Double colValue = Double.valueOf(firstData.get(colName).toString());
             int colIndex;
@@ -73,6 +74,9 @@ public class HeteroFeatureBinning extends BaseModel {
                 }
             }
             outputData.put(colName, colIndex);
+		    }catch(Throwable e){
+		        LOGGER.error("HeteroFeatureBinning error" ,e);
+            }
         }
         
         return outputData;
