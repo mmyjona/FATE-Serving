@@ -18,31 +18,28 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.constant.StatusCode;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto;
+import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamMeta.BoostingTreeModelMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamMeta.BoostingTreeModelMeta;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 public abstract class HeteroSecureBoost extends BaseModel {
-    protected List<Map<Integer, Double> > split_maskdict;
-    protected Map<String,Integer> featureNameFidMapping = Maps.newHashMap();
     public static final Logger LOGGER = LogManager.getLogger();
+    protected List<Map<Integer, Double>> split_maskdict;
+    protected Map<String, Integer> featureNameFidMapping = Maps.newHashMap();
     protected int treeNum;
     protected List<Double> initScore;
     protected List<DecisionTreeModelParam> trees;
     protected int numClasses;
     protected List<String> classes;
     protected int treeDim;
-    protected  double learningRate;
+    protected double learningRate;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -52,11 +49,11 @@ public abstract class HeteroSecureBoost extends BaseModel {
             BoostingTreeModelParam param = this.parseModel(BoostingTreeModelParam.parser(), protoParam);
             BoostingTreeModelMeta meta = this.parseModel(BoostingTreeModelMeta.parser(), protoMeta);
 
-            java.util.Map<java.lang.Integer, java.lang.String>   featureNameMapping =param.getFeatureNameFidMapping();
+            java.util.Map<java.lang.Integer, java.lang.String> featureNameMapping = param.getFeatureNameFidMapping();
 
-            featureNameMapping.forEach((k,v)->{
+            featureNameMapping.forEach((k, v) -> {
 
-                featureNameFidMapping.put(v,k);
+                featureNameFidMapping.put(v, k);
 
 
             });
@@ -86,9 +83,9 @@ public abstract class HeteroSecureBoost extends BaseModel {
         return caseId + "_" + modelId + "_" + String.valueOf(communicationRound);
     }
 
-    protected String[] parseTag(String  tag){
+    protected String[] parseTag(String tag) {
 
-        return   tag.split("_");
+        return tag.split("_");
     }
 
     protected int gotoNextLevel(int treeId, int treeNodeId, Map<String, Object> input) {
@@ -100,7 +97,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
             if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
             } else {
-                nextTreeNodeId =  this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
             }
         } else {
             if (this.trees.get(treeId).getMissingDirMaskdict().containsKey(treeNodeId)) {
@@ -120,10 +117,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
     }
 
     @Override
-    public abstract Map<String, Object> handlePredict(Context context , List<Map<String, Object> > inputData, FederatedParams predictParams);
-
-
-
+    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
 
 
 }

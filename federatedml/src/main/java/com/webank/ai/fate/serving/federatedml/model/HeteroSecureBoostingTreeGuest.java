@@ -18,23 +18,16 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.bean.ReturnResult;
-import com.webank.ai.fate.core.constant.StatusCode;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingTreeModelParam;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamMeta.BoostingTreeModelMeta;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.lang.Math;
+import java.util.List;
+import java.util.Map;
 
-public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
+public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
     private final String site = "guest";
 
@@ -62,10 +55,10 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
         ArrayList<Double> scores = new ArrayList<Double>();
         for (int i = 0; i < n; ++i) {
-            scores.add(weights[i]/ denominator);
+            scores.add(weights[i] / denominator);
         }
 
-        Map<String, Object> ret= Maps.newHashMap();
+        Map<String, Object> ret = Maps.newHashMap();
         ret.put("label", this.classes.get(maxIndex));
         ret.put("score", scores);
 
@@ -131,7 +124,7 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             for (int i = 0; i < this.treeDim; i++)
                 sumWeights[i] += this.initScore.get(i);
 
-            ret= softmax(sumWeights);
+            ret = softmax(sumWeights);
         } else {
             double sum = this.initScore.get(0);
             for (int i = 0; i < this.treeNum; ++i) {
@@ -144,14 +137,14 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
     }
 
     @Override
-    public Map<String, Object> handlePredict(Context context , List<Map<String, Object> > inputData, FederatedParams predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
-        LOGGER.info("HeteroSecureBoostingTreeGuest FederatedParams {}",predictParams);
+        LOGGER.info("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
 
         Map<String, Object> input = inputData.get(0);
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>();
 
-        ReturnResult  returnResult = this.getFederatedPredict(context, predictParams,Dict.FEDERATED_INFERENCE,false);
+        ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
 
         int featureHit = 0;
         for (String key : input.keySet()) {
@@ -186,12 +179,12 @@ public  class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
             predictParams.getData().put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
 
-            predictParams.getData().put(Dict.TREE_LOCATION,treeLocation);
+            predictParams.getData().put(Dict.TREE_LOCATION, treeLocation);
 
             try {
                 LOGGER.info("begin to federated");
 
-                ReturnResult  tempResult = this.getFederatedPredict(context, predictParams,Dict.FEDERATED_INFERENCE_FOR_TREE,false);
+                ReturnResult tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
 
                 Map<String, Object> afterLocation = tempResult.getData();
 

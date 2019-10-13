@@ -36,7 +36,6 @@
     <name>fate-serving-router</name>
 
 
-
     <dependencies>
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
@@ -56,6 +55,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>2.0.4.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+
         </dependency>
         <dependency>
             <groupId>com.webank.ai.fate</groupId>

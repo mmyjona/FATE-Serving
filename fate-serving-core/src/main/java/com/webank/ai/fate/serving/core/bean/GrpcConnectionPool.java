@@ -32,20 +32,19 @@ import java.util.concurrent.TimeUnit;
 
 public class GrpcConnectionPool {
 
-    private  GrpcConnectionPool(){
-
-    }
-
-    static private   GrpcConnectionPool    pool= new GrpcConnectionPool();
-
-    static public  GrpcConnectionPool  getPool(){
-        return  pool;
-    }
-
-
     private static final Logger LOGGER = LogManager.getLogger();
-
+    static private GrpcConnectionPool pool = new GrpcConnectionPool();
     ConcurrentHashMap<String, GenericObjectPool<ManagedChannel>> poolMap = new ConcurrentHashMap<String, GenericObjectPool<ManagedChannel>>();
+    private Integer maxTotal = 64;
+    private Integer maxIdle = 16;
+
+    private GrpcConnectionPool() {
+
+    }
+
+    static public GrpcConnectionPool getPool() {
+        return pool;
+    }
 
     public void returnPool(ManagedChannel channel, String address) {
         try {
@@ -56,9 +55,6 @@ public class GrpcConnectionPool {
             LOGGER.error("return to pool error", e);
         }
     }
-    private Integer maxTotal = 64;
-
-    private Integer maxIdle = 16;
 
     public ManagedChannel getManagedChannel(String key) throws Exception {
 

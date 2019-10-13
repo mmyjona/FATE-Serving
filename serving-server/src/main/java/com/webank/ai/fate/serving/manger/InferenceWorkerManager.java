@@ -25,8 +25,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InferenceWorkerManager {
-    private static ThreadPoolExecutor threadPoolExecutor;
     private static final Logger LOGGER = LogManager.getLogger();
+    private static ThreadPoolExecutor threadPoolExecutor;
 
     static {
         LinkedBlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>(10);
@@ -45,6 +45,10 @@ public class InferenceWorkerManager {
         threadPoolExecutor.execute(task);
     }
 
+    public static void prestartAllCoreThreads() {
+        threadPoolExecutor.prestartAllCoreThreads();
+    }
+
     static class InferenceWorkerThreadFactory implements ThreadFactory {
         private final AtomicInteger mThreadNum = new AtomicInteger(1);
 
@@ -60,9 +64,5 @@ public class InferenceWorkerManager {
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
             LOGGER.info("{} rejected.", r.toString());
         }
-    }
-
-    public static void prestartAllCoreThreads() {
-        threadPoolExecutor.prestartAllCoreThreads();
     }
 }

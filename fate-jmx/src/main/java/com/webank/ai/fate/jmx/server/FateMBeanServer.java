@@ -26,9 +26,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
-import java.io.InputStream;
 import java.rmi.registry.LocateRegistry;
-import java.util.Properties;
 
 public class FateMBeanServer {
 
@@ -40,6 +38,7 @@ public class FateMBeanServer {
 
     /**
      * FateMBeanServer Constructor
+     *
      * @param mBeanServer
      * @param initMBeans  auto register define mbeans
      */

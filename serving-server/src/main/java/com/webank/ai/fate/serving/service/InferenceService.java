@@ -26,7 +26,6 @@ import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.guest.GuestInferenceProvider;
-
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -39,23 +38,23 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Logger accessLOGGER = LogManager.getLogger(Dict.ACCESS);
     @Autowired
-    GuestInferenceProvider   guestInferenceProvider;
+    GuestInferenceProvider guestInferenceProvider;
 
 
     @Override
-    @RegisterService(useDynamicEnvironment = true ,serviceName ="inference" )
+    @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
     public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         inferenceServiceAction(req, responseObserver, InferenceActionType.SYNC_RUN);
     }
 
     @Override
-    @RegisterService(serviceName ="getInferenceResult" )
+    @RegisterService(serviceName = "getInferenceResult")
     public void getInferenceResult(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         inferenceServiceAction(req, responseObserver, InferenceActionType.GET_RESULT);
     }
 
     @Override
-    @RegisterService(useDynamicEnvironment = true ,serviceName ="startInferenceJob" )
+    @RegisterService(useDynamicEnvironment = true, serviceName = "startInferenceJob")
     public void startInferenceJob(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         inferenceServiceAction(req, responseObserver, InferenceActionType.ASYNC_RUN);
 
@@ -66,54 +65,59 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
 
-        InferenceRequest inferenceRequest =null;
+        InferenceRequest inferenceRequest = null;
         Context context = new BaseContext(new GuestInferenceLoggerPrinter());
         context.preProcess();
 
-        try{
         try {
-            context.putData(Dict.ORIGIN_REQUEST,req.getBody().toStringUtf8());
-            inferenceRequest = (InferenceRequest) ObjectTransform.json2Bean(req.getBody().toStringUtf8(), InferenceRequest.class);
+            try {
+                context.putData(Dict.ORIGIN_REQUEST, req.getBody().toStringUtf8());
+                inferenceRequest = (InferenceRequest) ObjectTransform.json2Bean(req.getBody().toStringUtf8(), InferenceRequest.class);
 
-            if (inferenceRequest != null) {
-                if(inferenceRequest.getCaseid().length()==0){
-                    inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
+                if (inferenceRequest != null) {
+                    if (inferenceRequest.getCaseid().length() == 0) {
+                        inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
+                    }
+                    context.setCaseId(inferenceRequest.getCaseid());
+                    context.setActionType(actionType.name());
+
+                    switch (actionType.name()) {
+                        case "SYNC_RUN":
+                            returnResult = guestInferenceProvider.syncInference(context, inferenceRequest);
+                            break;
+                        case "GET_RESULT":
+                            returnResult = guestInferenceProvider.getResult(context, inferenceRequest);
+                            break;
+                        case "ASYNC_RUN":
+                            returnResult = guestInferenceProvider.asynInference(context, inferenceRequest);
+                            break;
+                        default:
+
+                            throw new Exception();
+
+
+                    }
+
+                    //  returnResult = inferenceProvider.inference(context,inferenceRequest, actionType);
+                    if (returnResult.getRetcode() != InferenceRetCode.OK) {
+                        LOGGER.error("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
+                    }
+                } else {
+
+                    returnResult.setRetcode(InferenceRetCode.EMPTY_DATA);
                 }
-                context.setCaseId(inferenceRequest.getCaseid());
-                context.setActionType(actionType.name());
+            } catch (Throwable e) {
 
-                switch (actionType.name()){
-                    case  "SYNC_RUN":returnResult = guestInferenceProvider.syncInference(context,inferenceRequest);break;
-                    case  "GET_RESULT":  returnResult = guestInferenceProvider.getResult(context,inferenceRequest);break;
-                    case  "ASYNC_RUN":   returnResult = guestInferenceProvider.asynInference(context,inferenceRequest);break;
-                    default:
-
-                        throw  new Exception();
-
-
-
-                }
-
-              //  returnResult = inferenceProvider.inference(context,inferenceRequest, actionType);
-                if (returnResult.getRetcode() != InferenceRetCode.OK) {
-                    LOGGER.error("caseid {} inference {} failed: {}  result {}",context.getCaseId(), actionType, req.getBody().toStringUtf8(),returnResult);
-                }
-            } else {
-
-                returnResult.setRetcode(InferenceRetCode.EMPTY_DATA);
+                returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
+                LOGGER.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
             }
-        } catch (Throwable e) {
 
-            returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
-            LOGGER.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
-        }
+            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        } finally {
 
-        response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-        responseObserver.onNext(response.build());
-        responseObserver.onCompleted();
-        }finally {
-
-            context.postProcess(inferenceRequest,returnResult);
+            context.postProcess(inferenceRequest, returnResult);
         }
     }
 }

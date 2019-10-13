@@ -25,15 +25,15 @@ import org.apache.commons.lang.StringUtils;
 import java.util.List;
 
 
-public class DefaultRouterService  extends  AbstractRouterService {
+public class DefaultRouterService extends AbstractRouterService {
     @Override
-    public List<URL> doRouter(URL url, LoadBalanceModel  loadBalanceModel) {
+    public List<URL> doRouter(URL url, LoadBalanceModel loadBalanceModel) {
 
-        List<URL>   urls =  registry.getCacheUrls(url);
+        List<URL> urls = registry.getCacheUrls(url);
 
-        String  version= url.getParameter(Constants.VERSION_KEY);
-        if(CollectionUtils.isNotEmpty(urls) && StringUtils.isNotBlank(version)) {
-           urls= filterVersion(urls,version);
+        String version = url.getParameter(Constants.VERSION_KEY);
+        if (CollectionUtils.isNotEmpty(urls) && StringUtils.isNotBlank(version)) {
+            urls = filterVersion(urls, version);
         }
 //        else{
 //            AtomicReference<List<URL>>  resultUrls = new AtomicReference<>();
@@ -42,19 +42,18 @@ public class DefaultRouterService  extends  AbstractRouterService {
 //            urls= filterVersion(urls,version);
 //        }
 
-        if(CollectionUtils.isEmpty(urls)) {
+        if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
 
-        List<URL>  resultUrls = this.loadBalancer.select(urls);
+        List<URL> resultUrls = this.loadBalancer.select(urls);
 
-        logger.info("router service return urls {}",resultUrls);
+        logger.info("router service return urls {}", resultUrls);
 
-        return  resultUrls;
+        return resultUrls;
 
 
     }
-
 
 
 }

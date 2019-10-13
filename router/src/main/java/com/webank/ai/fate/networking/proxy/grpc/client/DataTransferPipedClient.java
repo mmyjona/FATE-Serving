@@ -64,7 +64,7 @@ public class DataTransferPipedClient {
     @Autowired
     private ErrorUtils errorUtils;
     @Autowired
-    private RouterService  routerService;
+    private RouterService routerService;
 
 
     private BasicMeta.Endpoint endpoint;
@@ -191,8 +191,7 @@ public class DataTransferPipedClient {
         //LOGGER.info("[UNARYCALL][CLIENT] packet: {}", toStringUtils.toOneLineString(packet));
 
         DataTransferServiceGrpc.DataTransferServiceStub stub = getStub(
-                packet.getHeader().getSrc(), packet.getHeader().getDst(),packet);
-
+                packet.getHeader().getSrc(), packet.getHeader().getDst(), packet);
 
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
@@ -216,29 +215,29 @@ public class DataTransferPipedClient {
         responseObserver.onCompleted();
     }
 
-    private DataTransferServiceGrpc.DataTransferServiceStub getStub(Proxy.Topic from, Proxy.Topic to,Proxy.Packet pack
+    private DataTransferServiceGrpc.DataTransferServiceStub getStub(Proxy.Topic from, Proxy.Topic to, Proxy.Packet pack
     ) {
 
         DataTransferServiceGrpc.DataTransferServiceStub stub = null;
 
-        String useRegisterString = serverConf.getProperties().getProperty("useRegister","false");
+        String useRegisterString = serverConf.getProperties().getProperty("useRegister", "false");
 
         boolean useRegister = Boolean.valueOf(useRegisterString);
 
-        if(fdnRouter instanceof ConfFileBasedFdnRouter&&useRegister) {
+        if (fdnRouter instanceof ConfFileBasedFdnRouter && useRegister) {
 
-            ConfFileBasedFdnRouter  confFileBasedFdnRouter = (ConfFileBasedFdnRouter)fdnRouter;
-            Map<String, Map<String, List<BasicMeta.Endpoint>>>  routerTable = confFileBasedFdnRouter.getRouteTable();
+            ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
+            Map<String, Map<String, List<BasicMeta.Endpoint>>> routerTable = confFileBasedFdnRouter.getRouteTable();
 
-            if(routerTable.containsKey(to.getPartyId())&& to.getRole().equals("serving")) {
+            if (routerTable.containsKey(to.getPartyId()) && to.getRole().equals("serving")) {
 
-                    stub = routerByServiceRegister(from, to, pack);
-                    if (stub != null) {
-                        LOGGER.info("appid {} register return stub",to.getPartyId());
-                        return stub;
-                    } else {
-                        LOGGER.info("appid {} register not return stub,try router table",to.getPartyId());
-                    }
+                stub = routerByServiceRegister(from, to, pack);
+                if (stub != null) {
+                    LOGGER.info("appid {} register return stub", to.getPartyId());
+                    return stub;
+                } else {
+                    LOGGER.info("appid {} register not return stub,try router table", to.getPartyId());
+                }
 
             }
         }
@@ -275,8 +274,6 @@ public class DataTransferPipedClient {
         }
 
 
-
-
         if (endpoint == null) {
             stub = grpcStubFactory.getAsyncStub(to);
         } else {
@@ -292,21 +289,21 @@ public class DataTransferPipedClient {
     }
 
 
-    private  DataTransferServiceGrpc.DataTransferServiceStub routerByServiceRegister(Proxy.Topic from, Proxy.Topic to,Proxy.Packet pack){
+    private DataTransferServiceGrpc.DataTransferServiceStub routerByServiceRegister(Proxy.Topic from, Proxy.Topic to, Proxy.Packet pack) {
         DataTransferServiceGrpc.DataTransferServiceStub stub = null;
-       String partId = to.getPartyId();
-       String role =  to.getRole();
-       String name = to.getName();
-       String serviceName = pack.getHeader().getCommand().getName();
+        String partId = to.getPartyId();
+        String role = to.getRole();
+        String name = to.getName();
+        String serviceName = pack.getHeader().getCommand().getName();
 
-        List<URL>   urls= routerService.router(URL.valueOf(role+"/"+partId+"/"+serviceName));
+        List<URL> urls = routerService.router(URL.valueOf(role + "/" + partId + "/" + serviceName));
 
-        if(CollectionUtils.isNotEmpty(urls)){
+        if (CollectionUtils.isNotEmpty(urls)) {
             URL url = urls.get(0);
-            BasicMeta.Endpoint.Builder  builder =  BasicMeta.Endpoint.newBuilder();
+            BasicMeta.Endpoint.Builder builder = BasicMeta.Endpoint.newBuilder();
             builder.setIp(url.getIp());
             builder.setPort(url.getPort());
-            BasicMeta.Endpoint  endpoint =  builder.build();
+            BasicMeta.Endpoint endpoint = builder.build();
             stub = grpcStubFactory.getAsyncStub(endpoint);
         }
         return stub;

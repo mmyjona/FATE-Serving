@@ -17,7 +17,6 @@
 package com.webank.ai.fate.register.url;
 
 
-import com.google.common.collect.Maps;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -41,7 +40,6 @@ class URL implements Serializable {
     private final String protocol;
 
 
-
     // by default, host to registry
     private final String host;
 
@@ -49,57 +47,22 @@ class URL implements Serializable {
     private final int port;
 
     private final String path;
-
-    public String getEnvironment() {
-        return environment;
-    }
-
-
-
-    private  String environment;
-
-
-
-    public String getProject() {
-        return project;
-    }
-
-    public  URL  setProject(String project){
-
-
-       return new URL(protocol, project, environment, host, port, path, this.parameters);
-    };
-
-
-    public  URL  setEnvironment(String  environment){
-
-        return new URL(protocol, project, environment, host, port, path, this.parameters);
-
-
-    }
-
-
-    private  String project;
-
     private final Map<String, String> parameters;
-
-    // ==== cache ====
-
+    private String environment;
+    private String project;
     private volatile transient Map<String, Number> numbers;
 
+    ;
     private volatile transient Map<String, URL> urls;
-
     private volatile transient String ip;
-
     private volatile transient String full;
 
+    // ==== cache ====
     private volatile transient String identity;
-
     private volatile transient String parameter;
-
     private volatile transient String string;
 
-    protected URL() {
+    public URL() {
         this.protocol = null;
         this.environment = null;
         this.project = null;
@@ -158,10 +121,10 @@ class URL implements Serializable {
         } else {
             parameters = new HashMap<>(parameters);
         }
-        this.parameters=  parameters;
+        this.parameters = parameters;
     }
 
-    public static URL valueOf(String url,String project,String environment) {
+    public static URL valueOf(String url, String project, String environment) {
 
         //grpc://fateserving/fate-cmd_fate-test")
         if (url == null || (url = url.trim()).length() == 0) {
@@ -235,14 +198,14 @@ class URL implements Serializable {
                 // ignore
             } else {
                 int x = url.indexOf("/");
-                if(x>0) {
+                if (x > 0) {
                     port = Integer.parseInt(url.substring(i + 1, x));
-                }else{
+                } else {
                     port = Integer.parseInt(url.substring(i + 1));
                 }
                 host = url.substring(0, i);
 
-                url = url.substring(x+1);
+                url = url.substring(x + 1);
             }
         }
 
@@ -257,7 +220,6 @@ class URL implements Serializable {
 //        }
         return new URL(protocol, project, environment, host, port, path, parameters);
     }
-
 
     /**
      * Parse url string
@@ -276,7 +238,7 @@ class URL implements Serializable {
         String username = null;
         String password = null;
         String host = null;
-        String project  = null;
+        String project = null;
         String environment = null;
         int port = 0;
         String path = null;
@@ -341,21 +303,21 @@ class URL implements Serializable {
                 // ignore
             } else {
                 int x = url.indexOf("/");
-                if(x>0) {
+                if (x > 0) {
                     port = Integer.parseInt(url.substring(i + 1, x));
-                }else{
+                } else {
                     port = Integer.parseInt(url.substring(i + 1));
                 }
                 host = url.substring(0, i);
 
-                url = url.substring(x+1);
+                url = url.substring(x + 1);
             }
         }
 
-        i=url.lastIndexOf("/");
-        if(i>0){
-            project  =  url.substring(0,i);
-            environment  =  url.substring(i+1);
+        i = url.lastIndexOf("/");
+        if (i > 0) {
+            project = url.substring(0, i);
+            environment = url.substring(i + 1);
         }
 
 //        if (url.length() > 0) {
@@ -427,6 +389,94 @@ class URL implements Serializable {
         }
     }
 
+    static String appendDefaultPort(String address, int defaultPort) {
+        if (address != null && address.length() > 0 && defaultPort > 0) {
+            int i = address.indexOf(':');
+            if (i < 0) {
+                return address + ":" + defaultPort;
+            } else if (Integer.parseInt(address.substring(i + 1)) == 0) {
+                return address.substring(0, i + 1) + defaultPort;
+            }
+        }
+        return address;
+    }
+
+    public static void main(String[] args) {
+
+
+    }
+
+    public static URL parseJMXServiceUrl(String url) {
+        if (url == null || (url = url.trim()).length() == 0) {
+            throw new IllegalArgumentException("url == null");
+        }
+        String protocol = null;
+        String project = null;
+        String environment = null;
+        String host = null;
+        int port = 0;
+        String path = null;
+
+        // diffent
+        int i = url.lastIndexOf("://");
+        if (i >= 0) {
+            if (i == 0) {
+                throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            }
+            protocol = url.substring(0, i);
+            url = url.substring(i + 3);
+        } else {
+            i = url.indexOf(":/");
+            if (i >= 0) {
+                if (i == 0) {
+                    throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+                }
+                protocol = url.substring(0, i);
+                url = url.substring(i + 1);
+            }
+        }
+
+        i = url.lastIndexOf("/");
+        if (i >= 0) {
+            path = url.substring(i + 1);
+            url = url.substring(0, i);
+        }
+
+        i = url.lastIndexOf(":");
+        if (i >= 0 && i < url.length() - 1) {
+            int x = url.indexOf("/");
+            if (x > 0) {
+                port = Integer.parseInt(url.substring(i + 1, x));
+            } else {
+                port = Integer.parseInt(url.substring(i + 1));
+            }
+            host = url.substring(0, i);
+        }
+
+        return new URL(protocol, project, environment, host, port, path, new HashMap<>());
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public URL setEnvironment(String environment) {
+
+        return new URL(protocol, project, environment, host, port, path, this.parameters);
+
+
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public URL setProject(String project) {
+
+
+        return new URL(protocol, project, environment, host, port, path, this.parameters);
+    }
+
     public String getProtocol() {
         return protocol;
     }
@@ -435,13 +485,9 @@ class URL implements Serializable {
         return new URL(protocol, project, environment, host, port, path, getParameters());
     }
 
-
-
     public URL setPassword(String password) {
         return new URL(protocol, project, password, host, port, path, getParameters());
     }
-
-
 
     public String getHost() {
         return host;
@@ -519,18 +565,6 @@ class URL implements Serializable {
             }
         }
         return urls;
-    }
-
-    static String appendDefaultPort(String address, int defaultPort) {
-        if (address != null && address.length() > 0 && defaultPort > 0) {
-            int i = address.indexOf(':');
-            if (i < 0) {
-                return address + ":" + defaultPort;
-            } else if (Integer.parseInt(address.substring(i + 1)) == 0) {
-                return address.substring(0, i + 1) + defaultPort;
-            }
-        }
-        return address;
     }
 
     public String getPath() {
@@ -1076,6 +1110,13 @@ class URL implements Serializable {
         return new URL(protocol, project, environment, host, port, path, map);
     }
 
+//    public URL addParameterString(String query) {
+//        if (StringUtils.isEmpty(query)) {
+//            return this;
+//        }
+//        return addParameters(StringUtils.parseQueryString(query));
+//    }
+
     public URL addParametersIfAbsent(Map<String, String> parameters) {
         if (CollectionUtils.isEmptyMap(parameters)) {
             return this;
@@ -1099,13 +1140,6 @@ class URL implements Serializable {
         }
         return addParameters(map);
     }
-
-//    public URL addParameterString(String query) {
-//        if (StringUtils.isEmpty(query)) {
-//            return this;
-//        }
-//        return addParameters(StringUtils.parseQueryString(query));
-//    }
 
     public URL removeParameter(String key) {
         if (StringUtils.isEmpty(key)) {
@@ -1264,11 +1298,10 @@ class URL implements Serializable {
             return null;
         }
 
-        return  project+"/"+environment+"/"+inf;
+        return project + "/" + environment + "/" + inf;
 
-       // return buildKey(inf, this.project, this.environment);
+        // return buildKey(inf, this.project, this.environment);
     }
-
 
     private String buildString(boolean appendUser, boolean appendParameter, boolean useIP, boolean useService, String... parameters) {
         StringBuilder buf = new StringBuilder();
@@ -1304,13 +1337,12 @@ class URL implements Serializable {
             path = getPath();
         }
 
-        if(StringUtils.isNotEmpty(project)){
-
+        if (StringUtils.isNotEmpty(project)) {
 
 
             buf.append(project);
         }
-        if(StringUtils.isNotEmpty(environment)){
+        if (StringUtils.isNotEmpty(environment)) {
             buf.append("/");
             buf.append(environment);
         }
@@ -1339,6 +1371,7 @@ class URL implements Serializable {
 
     /**
      * The format is "{interface}:[version]:[group]"
+     *
      * @return
      */
     public String getColonSeparatedKey() {
@@ -1361,10 +1394,9 @@ class URL implements Serializable {
         }
     }
 
-
-
     /**
      * The format of return value is '{group}/{path/interfaceName}:{version}'
+     *
      * @return
      */
 //    public String getPathKey() {
@@ -1386,10 +1418,7 @@ class URL implements Serializable {
 //        }
 //        return buf.toString();
 //    }
-  //  public  buildKey(inf  )
-
-
-
+    //  public  buildKey(inf  )
     public String toServiceStringWithoutResolving() {
         return buildString(true, false, false, true);
     }
@@ -1483,6 +1512,12 @@ class URL implements Serializable {
         return getMethodPositiveParameter(method, key, defaultValue);
     }
 
+//    public Configuration toConfiguration() {
+//        InmemoryConfiguration configuration = new InmemoryConfiguration();
+//        configuration.addProperties(parameters);
+//        return configuration;
+//    }
+
     /**
      * @see #getMethodParameter(String, String, boolean)
      * @deprecated Replace to <code>getMethodParameter(String, String, boolean)</code>
@@ -1501,12 +1536,6 @@ class URL implements Serializable {
         return getMethodParameter(method, key, defaultValue);
     }
 
-//    public Configuration toConfiguration() {
-//        InmemoryConfiguration configuration = new InmemoryConfiguration();
-//        configuration.addProperties(parameters);
-//        return configuration;
-//    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -1518,8 +1547,8 @@ class URL implements Serializable {
         result = prime * result + port;
         result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
         result = prime * result + ((project == null) ? 0 : project.hashCode());
-        result = prime * result + ((environment==null)? 0:environment.hashCode());
-        result = prime * result + ((project==null)? 0:project.hashCode());
+        result = prime * result + ((environment == null) ? 0 : environment.hashCode());
+        result = prime * result + ((project == null) ? 0 : project.hashCode());
 
         return result;
     }
@@ -1582,65 +1611,6 @@ class URL implements Serializable {
             return false;
         }
         return true;
-    }
-
-
-
-    public static void main(String[] args){
-
-
-
-
-    }
-
-    public static URL parseJMXServiceUrl(String url) {
-        if (url == null || (url = url.trim()).length() == 0) {
-            throw new IllegalArgumentException("url == null");
-        }
-        String protocol = null;
-        String project = null;
-        String environment = null;
-        String host = null;
-        int port = 0;
-        String path = null;
-
-        // diffent
-        int i = url.lastIndexOf("://");
-        if (i >= 0) {
-            if (i == 0) {
-                throw new IllegalStateException("url missing protocol: \"" + url + "\"");
-            }
-            protocol = url.substring(0, i);
-            url = url.substring(i + 3);
-        } else {
-            i = url.indexOf(":/");
-            if (i >= 0) {
-                if (i == 0) {
-                    throw new IllegalStateException("url missing protocol: \"" + url + "\"");
-                }
-                protocol = url.substring(0, i);
-                url = url.substring(i + 1);
-            }
-        }
-
-        i = url.lastIndexOf("/");
-        if (i >= 0) {
-            path = url.substring(i + 1);
-            url = url.substring(0, i);
-        }
-
-        i = url.lastIndexOf(":");
-        if (i >= 0 && i < url.length() - 1) {
-            int x = url.indexOf("/");
-            if(x>0) {
-                port = Integer.parseInt(url.substring(i + 1, x));
-            }else{
-                port = Integer.parseInt(url.substring(i + 1));
-            }
-            host = url.substring(0, i);
-        }
-
-        return new URL(protocol, project, environment, host, port, path, new HashMap<>());
     }
 
 }

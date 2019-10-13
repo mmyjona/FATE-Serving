@@ -17,18 +17,14 @@
 package com.webank.ai.fate.register.common;
 
 
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.interfaces.Registry;
-
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
-
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,63 +43,26 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.webank.ai.fate.register.common.Constants.*;
 
 
-
-
 public abstract class AbstractRegistry implements Registry {
 
 
-
     private static final Logger logger = LogManager.getLogger(AbstractRegistry.class);
-
-
-    public Map<String, Integer> getServieWeightMap() {
-        return servieWeightMap;
-    }
-
-    public void setServieWeightMap(Map<String, Integer> servieWeightMap) {
-        this.servieWeightMap = servieWeightMap;
-    }
-
-    protected  Map<String,Integer>  servieWeightMap = Maps.newHashMap();
-
-
-
-
     private static final char URL_SEPARATOR = ' ';
-
     private static final String URL_SPLIT = "\\s+";
-
     private static final int MAX_RETRY_TIMES_SAVE_PROPERTIES = 3;
-
     private final Properties properties = new Properties();
-
-
     private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("FateSaveRegistryCache", true));
-
     private final boolean syncSaveFile;
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final AtomicInteger savePropertiesRetryTimes = new AtomicInteger();
-
     private final Set<URL> registered = new HashSet<>();
-
-
-
-
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
+    protected Map<String, Integer> servieWeightMap = Maps.newHashMap();
+    protected Set<String> projectSets = Sets.newHashSet();
     private URL registryUrl;
     // Local disk cache file
     private File file;
-
-    protected  Set<String>  projectSets = Sets.newHashSet();
-
-    public  void  subProject(String project){
-        projectSets.add(project);
-
-    }
-
-    public abstract void  doSubProject(String project);
-
     public AbstractRegistry(URL url) {
         setUrl(url);
         // Start file save timer
@@ -132,6 +91,21 @@ public abstract class AbstractRegistry implements Registry {
         }
         return urls;
     }
+
+    public Map<String, Integer> getServieWeightMap() {
+        return servieWeightMap;
+    }
+
+    public void setServieWeightMap(Map<String, Integer> servieWeightMap) {
+        this.servieWeightMap = servieWeightMap;
+    }
+
+    public void subProject(String project) {
+        projectSets.add(project);
+
+    }
+
+    public abstract void doSubProject(String project);
 
     @Override
     public URL getUrl() {
@@ -170,7 +144,7 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     public void doSaveProperties(long version) {
-        logger.info("doSaveProperties {} {}",version,properties);
+        logger.info("doSaveProperties {} {}", version, properties);
 
         if (version < lastCacheChanged.get()) {
             return;
@@ -352,10 +326,10 @@ public abstract class AbstractRegistry implements Registry {
     protected void recover() throws Exception {
 
 
-       for(String  project:this.projectSets){
-           logger.info("Recover project {} " ,project);
+        for (String project : this.projectSets) {
+            logger.info("Recover project {} ", project);
             subProject(project);
-       }
+        }
 
         // register
         Set<URL> recoverRegistered = new HashSet<>(getRegistered());
@@ -448,7 +422,7 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     private void saveProperties(URL url) {
-        logger.info("saveProperties url {}",url);
+        logger.info("saveProperties url {}", url);
 
         if (file == null) {
             return;
@@ -468,7 +442,7 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
 
-            logger.info("properties set property key {} value {}",url.getServiceKey(),buf.toString());
+            logger.info("properties set property key {} value {}", url.getServiceKey(), buf.toString());
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
             if (syncSaveFile) {
@@ -524,6 +498,11 @@ public abstract class AbstractRegistry implements Registry {
         return getUrl().toString();
     }
 
+    public static interface ConfigurationListener {
+
+        void process(ConfigChangeEvent event);
+    }
+
     private class SaveProperties implements Runnable {
         private long version;
 
@@ -535,11 +514,5 @@ public abstract class AbstractRegistry implements Registry {
         public void run() {
             doSaveProperties(version);
         }
-    }
-
-
-    public static interface ConfigurationListener {
-
-        void process(ConfigChangeEvent event);
     }
 }

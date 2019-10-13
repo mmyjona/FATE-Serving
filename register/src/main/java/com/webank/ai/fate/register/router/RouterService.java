@@ -24,10 +24,9 @@ import java.util.List;
 public interface RouterService {
 
 
-    List<URL> router(URL  url, LoadBalanceModel  loadBalanceModel);
+    List<URL> router(URL url, LoadBalanceModel loadBalanceModel);
 
-    List<URL> router(URL  url);
-
+    List<URL> router(URL url);
 
 
 }

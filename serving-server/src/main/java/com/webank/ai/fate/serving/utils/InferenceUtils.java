@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.utils;
 
 
 import com.webank.ai.fate.core.bean.ReturnResult;
-
 import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.manager.FederatedUtils;
@@ -44,13 +43,13 @@ public class InferenceUtils {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public static void logInference(Context context , Enum<FederatedInferenceType> inferenceType, FederatedParty federatedParty, FederatedRoles federatedRoles, String caseid, String seqno, int retcode, long elapsed, boolean getRemotePartyResult, boolean billing, Map<String, Object> inferenceRequest, ReturnResult inferenceResult) {
-        inferenceAuditLogger.info("{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.localIp,inferenceType, federatedParty.getRole(), federatedParty.getPartyId(), FederatedUtils.federatedRolesIdentificationString(federatedRoles), caseid, seqno, retcode, elapsed, getRemotePartyResult ? 1 : 0, billing ? 1 : 0,context.isHitCache());
+    public static void logInference(Context context, Enum<FederatedInferenceType> inferenceType, FederatedParty federatedParty, FederatedRoles federatedRoles, String caseid, String seqno, int retcode, long elapsed, boolean getRemotePartyResult, boolean billing, Map<String, Object> inferenceRequest, ReturnResult inferenceResult) {
+        inferenceAuditLogger.info("{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.localIp, inferenceType, federatedParty.getRole(), federatedParty.getPartyId(), FederatedUtils.federatedRolesIdentificationString(federatedRoles), caseid, seqno, retcode, elapsed, getRemotePartyResult ? 1 : 0, billing ? 1 : 0, context.isHitCache());
         Map<String, Object> inferenceLog = new HashMap<>();
         inferenceLog.put(Dict.INFERENCE_REQUEST, inferenceRequest);
         inferenceLog.put(Dict.INFERENCE_RESULT, ObjectTransform.bean2Json(inferenceResult));
         String inferenceLogBase64String = Base64.getEncoder().encodeToString(ObjectTransform.bean2Json(inferenceLog).getBytes());
-        inferenceLogger.info("{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.localIp,inferenceType, federatedParty.getRole(), federatedParty.getPartyId(), FederatedUtils.federatedRolesIdentificationString(federatedRoles), caseid, seqno, retcode, elapsed, getRemotePartyResult ? 1 : 0, billing ? 1 : 0,context.isHitCache(), inferenceLogBase64String);
+        inferenceLogger.info("{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.localIp, inferenceType, federatedParty.getRole(), federatedParty.getPartyId(), FederatedUtils.federatedRolesIdentificationString(federatedRoles), caseid, seqno, retcode, elapsed, getRemotePartyResult ? 1 : 0, billing ? 1 : 0, context.isHitCache(), inferenceLogBase64String);
     }
 
     public static Object getClassByName(String classPath) {

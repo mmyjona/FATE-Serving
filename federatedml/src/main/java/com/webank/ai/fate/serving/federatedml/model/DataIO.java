@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.Map;
 
 public class DataIO extends BaseModel {
+    private static final Logger LOGGER = LogManager.getLogger();
     private DataIOMeta dataIOMeta;
     private DataIOParam dataIOParam;
     private Imputer imputer;
     private Outlier outlier;
     private boolean isImputer;
     private boolean isOutlier;
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -46,14 +46,14 @@ public class DataIO extends BaseModel {
             LOGGER.info("data io isImputer {}", this.isImputer);
             if (this.isImputer) {
                 this.imputer = new Imputer(this.dataIOMeta.getImputerMeta().getMissingValueList(),
-                                           this.dataIOParam.getImputerParam().getMissingReplaceValue());
+                        this.dataIOParam.getImputerParam().getMissingReplaceValue());
             }
-            
+
             this.isOutlier = this.dataIOMeta.getOutlierMeta().getIsOutlier();
             LOGGER.info("data io isOutlier {}", this.isOutlier);
             if (this.isOutlier) {
                 this.outlier = new Outlier(this.dataIOMeta.getOutlierMeta().getOutlierValueList(),
-                                           this.dataIOParam.getOutlierParam().getOutlierReplaceValue());
+                        this.dataIOParam.getOutlierParam().getOutlierReplaceValue());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -64,17 +64,17 @@ public class DataIO extends BaseModel {
     }
 
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object> > inputData, FederatedParams predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         Map<String, Object> input = inputData.get(0);
-    
+
         if (this.isImputer) {
             input = this.imputer.transform(input);
         }
-    
+
         if (this.isOutlier) {
-            input = this.outlier.transform(input);	
+            input = this.outlier.transform(input);
         }
-    
+
         return input;
     }
 }

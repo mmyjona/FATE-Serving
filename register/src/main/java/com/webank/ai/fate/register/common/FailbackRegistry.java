@@ -16,15 +16,10 @@
 
 package com.webank.ai.fate.register.common;
 
-import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.task.*;
-
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.url.UrlUtils;
-import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.register.utils.URLBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,21 +46,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final ConcurrentMap<Holder, FailedNotifiedTask> failedNotified = new ConcurrentHashMap<Holder, FailedNotifiedTask>();
 
-    private final ConcurrentMap<String,FailedSubProjectTask>  failedSubProject =  new  ConcurrentHashMap<>();
+    private final ConcurrentMap<String, FailedSubProjectTask> failedSubProject = new ConcurrentHashMap<>();
 
 
     private final int retryPeriod;
 
     private final HashedWheelTimer retryTimer;
-
-
-
-    @Override
-    public  void  subProject(String project){
-        super.subProject(project);
-        failedSubProject.remove(project);
-        doSubProject(project);
-    }
 
 
     public FailbackRegistry(URL url) {
@@ -74,6 +60,19 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
         // since the retry task will not be very much. 128 ticks is enough.
         retryTimer = new HashedWheelTimer(new NamedThreadFactory(REFIX_FATE_REGISTRY_RETRY_TIMER, true), retryPeriod, TimeUnit.MILLISECONDS, 128);
+    }
+
+    @Override
+    public void subProject(String project) {
+
+        logger.info("try to subProject: {}", project);
+        super.subProject(project);
+        failedSubProject.remove(project);
+        try {
+            doSubProject(project);
+        } catch (Exception e) {
+            addFailedSubscribedProjectTask(project);
+        }
     }
 
     public void removeFailedRegisteredTask(URL url) {
@@ -107,14 +106,14 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     public void addFailedSubscribedProjectTask(String project) {
 
-        failedSubProject.remove(project);
-
+        logger.info("try to add failed subscribed project {}",project);
 
         FailedSubProjectTask oldOne = failedSubProject.get(project);
         if (oldOne != null) {
             return;
         }
-       URL  url = URL.valueOf("");
+        URL url = new URL();
+
         URL newUrl = url.setProject(project);
 
         FailedSubProjectTask newTask = new FailedSubProjectTask(newUrl, this);
@@ -314,7 +313,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     @Override
     public void subscribe(URL url, NotifyListener listener) {
-        logger.info("prepare to subscribe "+url);
+        logger.info("prepare to subscribe " + url);
         super.subscribe(url, listener);
         removeFailedSubscribed(url, listener);
         try {
@@ -399,6 +398,8 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     @Override
     protected void recover() throws Exception {
         // register
+        logger.info("prepare to recover registed......{}", getRegistered());
+
         Set<URL> recoverRegistered = new HashSet<URL>(getRegistered());
         if (!recoverRegistered.isEmpty()) {
             if (logger.isInfoEnabled()) {
@@ -408,6 +409,23 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 addFailedRegistered(url);
             }
         }
+
+        logger.info("prepare to recover registed.project.....{}", projectSets);
+
+        Set<String>  subjectSets = new HashSet(this.projectSets);
+        if(!subjectSets.isEmpty()) {
+            subjectSets.forEach(project -> {
+                try{
+                this.addFailedSubscribedProjectTask(project);
+            }catch(Exception e){
+                    logger.error("recover addFailedSubscribedProjectTask error",e);
+
+            }
+
+            });
+        }
+
+        logger.info("prepare to recover subscribed......{}", getSubscribed());
         // subscribe
         Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<URL, Set<NotifyListener>>(getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
@@ -421,6 +439,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 }
             }
         }
+        logger.info("recover over !!!!!!");
     }
 
     @Override

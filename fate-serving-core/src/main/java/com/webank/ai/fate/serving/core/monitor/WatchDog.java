@@ -25,29 +25,26 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class WatchDog {
 
-    private  static AtomicLong  RPC_IN_PROCESS =new  AtomicLong(0);
-
+    private static final int MAX_PROCESS_COUNT = 100000;
+    private static AtomicLong RPC_IN_PROCESS = new AtomicLong(0);
     private static AtomicLong TOTAL_RPC_PROCESS = new AtomicLong(0);
     private static AtomicLong COMPLATE_RPC_PROCESS = new AtomicLong(0);
-
     private static ConcurrentHashMap<String, AtomicLong> SERVICE_PROCESS_COUNT_MAP = new ConcurrentHashMap<String, AtomicLong>();
 
-    private static final int MAX_PROCESS_COUNT = 100000;
-
-    public  static void  enter(Context context){
+    public static void enter(Context context) {
         RPC_IN_PROCESS.addAndGet(1);
     }
 
-    public  static void  quit(Context  context){
+    public static void quit(Context context) {
         RPC_IN_PROCESS.decrementAndGet();
     }
 
-    public  static long  get(){
+    public static long get() {
         return RPC_IN_PROCESS.get();
     }
 
     public static void enter(String serviceName) {
-        if(StringUtils.isNotEmpty(serviceName)) {
+        if (StringUtils.isNotEmpty(serviceName)) {
             if (SERVICE_PROCESS_COUNT_MAP.get(serviceName) == null) {
                 SERVICE_PROCESS_COUNT_MAP.putIfAbsent(serviceName, new AtomicLong(1));
             } else {
@@ -61,7 +58,7 @@ public class WatchDog {
     }
 
     public static void quit(String serviceName) {
-        if(StringUtils.isNotEmpty(serviceName)) {
+        if (StringUtils.isNotEmpty(serviceName)) {
             if (SERVICE_PROCESS_COUNT_MAP.containsKey(serviceName)) {
                 SERVICE_PROCESS_COUNT_MAP.get(serviceName).decrementAndGet();
                 // update in process

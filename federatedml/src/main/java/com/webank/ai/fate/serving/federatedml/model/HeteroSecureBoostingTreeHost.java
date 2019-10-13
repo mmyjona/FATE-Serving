@@ -16,28 +16,21 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-import com.webank.ai.fate.core.constant.StatusCode;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingTreeModelParam;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamMeta.BoostingTreeModelMeta;
-import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.bean.CacheManager;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.FederatedParams;
 
-import com.webank.ai.fate.serving.core.manager.DefaultCacheManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
-public  class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
+public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
 
 
-   // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);
+    // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);
 
     /*
     Map<String, Double> forward(List<Map<String, Object>> inputDatas) {
@@ -63,23 +56,23 @@ public  class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         return treeNodeId;
     }
 
-    public void saveData(Context   context,String tag, Map<String, Object> data) {
+    public void saveData(Context context, String tag, Map<String, Object> data) {
 
-        CacheManager.getInstance().store(context,tag,data)  ;
+        CacheManager.getInstance().store(context, tag, data);
 
     }
 
-    public Map<String, Object> getData(Context  context,String tag) {
+    public Map<String, Object> getData(Context context, String tag) {
 
-        Map data = CacheManager.getInstance().restore(context,tag,Map.class);
+        Map data = CacheManager.getInstance().restore(context, tag, Map.class);
 
         return data;
     }
 
     @Override
-    public Map<String, Object> handlePredict(Context context , List<Map<String, Object> > inputData, FederatedParams predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
-        LOGGER.info("HeteroSecureBoostingTreeHost FederatedParams {}",predictParams);
+        LOGGER.info("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
 
         Map<String, Object> input = inputData.get(0);
 
@@ -94,19 +87,18 @@ public  class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        this.saveData(context ,tag, fidValueMapping);
+        this.saveData(context, tag, fidValueMapping);
         return ret;
     }
 
 
-
-    public Map<String, Object> predictSingleRound(Context context , Map<String, Object> interactiveData, FederatedParams predictParams) {
+    public Map<String, Object> predictSingleRound(Context context, Map<String, Object> interactiveData, FederatedParams predictParams) {
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
-        Map<String, Object> input = this.getData(context,tag);
+        Map<String, Object> input = this.getData(context, tag);
         Map<String, Object> ret = new HashMap<String, Object>();
         for (String treeIdx : interactiveData.keySet()) {
             int idx = Integer.valueOf(treeIdx);
-            int nodeId = this.traverseTree(idx, (Integer)interactiveData.get(treeIdx), input);
+            int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input);
             ret.put(treeIdx, nodeId);
         }
 

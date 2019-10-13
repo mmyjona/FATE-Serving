@@ -27,10 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
-import static com.webank.ai.fate.register.common.Constants.ANYHOST_VALUE;
-import static com.webank.ai.fate.register.common.Constants.LOCALHOST_KEY;
-import static com.webank.ai.fate.register.common.Constants.LOCALHOST_VALUE;
-
+import static com.webank.ai.fate.register.common.Constants.*;
 
 
 /**
@@ -50,12 +47,9 @@ public class NetUtils {
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
     private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
-
-
-    private static volatile InetAddress LOCAL_ADDRESS = null;
-
     private static final String SPLIT_IPV4_CHARECTER = "\\.";
     private static final String SPLIT_IPV6_CHARECTER = ":";
+    private static volatile InetAddress LOCAL_ADDRESS = null;
 
     public static int getRandomPort() {
         return RND_PORT_START + ThreadLocalRandom.current().nextInt(RND_PORT_RANGE);
@@ -200,7 +194,6 @@ public class NetUtils {
     }
 
 
-
     public static InetAddress getLocalAddress() {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
@@ -246,7 +239,7 @@ public class NetUtils {
 
                 }
             }
-        } catch (Throwable  e) {
+        } catch (Throwable e) {
             logger.error(e.getMessage(), e);
         }
         return "";
@@ -282,7 +275,7 @@ public class NetUtils {
     }
 
 
-    private static InetAddress getLocalAddress0(String  name) {
+    private static InetAddress getLocalAddress0(String name) {
         InetAddress localAddress = null;
         try {
             localAddress = InetAddress.getLocalHost();
@@ -305,7 +298,7 @@ public class NetUtils {
                     if (network.isLoopback() || network.isVirtual() || !network.isUp()) {
                         continue;
                     }
-                    if(StringUtils.isNotEmpty(name)) {
+                    if (StringUtils.isNotEmpty(name)) {
                         if (!network.getName().equals(name)) {
                             continue;
                         }
@@ -316,7 +309,7 @@ public class NetUtils {
                             Optional<InetAddress> addressOp = toValidAddress(addresses.nextElement());
                             if (addressOp.isPresent()) {
                                 try {
-                                    if(addressOp.get().isReachable(100)){
+                                    if (addressOp.get().isReachable(100)) {
                                         return addressOp.get();
                                     }
                                 } catch (IOException e) {
@@ -336,7 +329,6 @@ public class NetUtils {
         }
         return localAddress;
     }
-
 
 
     /**
@@ -396,7 +388,7 @@ public class NetUtils {
                 InetAddress address = (InetAddress) addresses.nextElement();
                 if (preferIpv6 && address instanceof Inet6Address) {
                     try {
-                        if(address.isReachable(100)){
+                        if (address.isReachable(100)) {
                             multicastSocket.setInterface(address);
                             interfaceSet = true;
                             break;
@@ -406,7 +398,7 @@ public class NetUtils {
                     }
                 } else if (!preferIpv6 && address instanceof Inet4Address) {
                     try {
-                        if(address.isReachable(100)){
+                        if (address.isReachable(100)) {
                             multicastSocket.setInterface(address);
                             interfaceSet = true;
                             break;

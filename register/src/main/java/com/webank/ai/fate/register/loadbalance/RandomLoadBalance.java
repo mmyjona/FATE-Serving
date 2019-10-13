@@ -17,7 +17,6 @@
 package com.webank.ai.fate.register.loadbalance;
 
 
-
 import com.webank.ai.fate.register.url.URL;
 import org.apache.curator.shaded.com.google.common.collect.Lists;
 
@@ -30,7 +29,7 @@ public class RandomLoadBalance extends AbstractLoadBalancer {
     public static final String NAME = "random";
 
     @Override
-       protected  List<URL> doSelect(List<URL> urls){
+    protected List<URL> doSelect(List<URL> urls) {
 
         int length = urls.size();
 

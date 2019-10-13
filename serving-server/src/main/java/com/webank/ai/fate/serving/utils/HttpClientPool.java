@@ -18,8 +18,13 @@ package com.webank.ai.fate.serving.utils;
 
 import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -29,24 +34,19 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class HttpClientPool {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -60,7 +60,7 @@ public class HttpClientPool {
                 .setConnectTimeout(500)
                 .setSocketTimeout(2000).build();
         httpRequestBase.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
-        if (headers != null){
+        if (headers != null) {
             headers.forEach((key, value) -> {
                 httpRequestBase.addHeader(key, value);
             });
@@ -103,15 +103,15 @@ public class HttpClientPool {
         return httpClient;
     }
 
-    public static String post(String url, Map<String, Object> requestData){
+    public static String post(String url, Map<String, Object> requestData) {
         return sendPost(url, requestData, null);
     }
 
-    public static String post(String url, Map<String, Object> requestData, Map<String, String> headers){
+    public static String post(String url, Map<String, Object> requestData, Map<String, String> headers) {
         return sendPost(url, requestData, headers);
     }
 
-    public static String sendPost(String url, Map<String, Object> requestData, Map<String, String> headers){
+    public static String sendPost(String url, Map<String, Object> requestData, Map<String, String> headers) {
         HttpPost httpPost = new HttpPost(url);
         config(httpPost, headers);
         StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);

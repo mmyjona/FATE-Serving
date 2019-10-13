@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Scale extends BaseModel {
+    private static final Logger LOGGER = LogManager.getLogger();
     private ScaleMeta scaleMeta;
     private ScaleParam scaleParam;
     private boolean need_run;
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {

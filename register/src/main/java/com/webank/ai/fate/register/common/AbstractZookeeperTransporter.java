@@ -128,7 +128,6 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
     }
 
 
-
     Map<String, ZookeeperClient> getZookeeperClientMap() {
         return zookeeperClientMap;
     }

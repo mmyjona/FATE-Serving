@@ -17,21 +17,12 @@
 package com.webank.ai.fate.serving.core.bean;
 
 public class FederatedParty {
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public void setPartyId(String partyId) {
-        this.partyId = partyId;
-    }
-
     private String role;
     private String partyId;
 
     public FederatedParty() {
 
     }
-
     public FederatedParty(String role, String partyId) {
         this.role = role;
         this.partyId = partyId;
@@ -41,7 +32,15 @@ public class FederatedParty {
         return role;
     }
 
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public String getPartyId() {
         return partyId;
+    }
+
+    public void setPartyId(String partyId) {
+        this.partyId = partyId;
     }
 }

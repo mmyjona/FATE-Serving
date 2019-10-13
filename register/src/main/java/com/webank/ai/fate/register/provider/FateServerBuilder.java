@@ -15,23 +15,16 @@
  */
 
 package com.webank.ai.fate.register.provider;
+
 import com.webank.ai.fate.register.annotions.RegisterService;
-import com.webank.ai.fate.register.common.Constants;
-import com.webank.ai.fate.register.common.RouterModel;
-import com.webank.ai.fate.register.interfaces.Registry;
 import io.grpc.*;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
-import org.apache.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.task.TaskExecutor;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
-import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +32,23 @@ import java.util.concurrent.TimeUnit;
 public class FateServerBuilder extends ServerBuilder {
 
 
+    ServerBuilder serverBuilder;
+    private String partyId;
+    private String version;
+    private String project;
+    private String environment;
+    private String application;
+    private String zkRegisterLocation;
+
+    public FateServerBuilder(ServerBuilder serverBuilder) {
+        this.serverBuilder = serverBuilder;
+    }
+
+    public static FateServerBuilder forNettyServerBuilderAddress(SocketAddress socketAddress) {
+
+        return new FateServerBuilder(NettyServerBuilder.forAddress(socketAddress));
+
+    }
 
     public String getPartyId() {
         return partyId;
@@ -46,7 +56,7 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder setPartyId(String partyId) {
         this.partyId = partyId;
-        return  this;
+        return this;
     }
 
     public String getVersion() {
@@ -55,12 +65,8 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder setVersion(String version) {
         this.version = version;
-        return  this;
+        return this;
     }
-
-    private  String  partyId;
-
-    private  String  version;
 
     public String getProject() {
         return project;
@@ -68,7 +74,7 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder setProject(String project) {
         this.project = project;
-        return  this;
+        return this;
     }
 
     public String getEnvironment() {
@@ -80,10 +86,6 @@ public class FateServerBuilder extends ServerBuilder {
         return this;
     }
 
-    private  String  project;
-
-    private String   environment;
-
     public String getApplication() {
         return application;
     }
@@ -91,104 +93,75 @@ public class FateServerBuilder extends ServerBuilder {
     public FateServerBuilder setApplication(String application) {
         this.application = application;
 
-        return  this;
+        return this;
     }
 
-    private  String  application;
+    public FateServerBuilder maxConcurrentCallsPerConnection(int count) {
 
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-
-
-    public FateServerBuilder(ServerBuilder serverBuilder){
-        this.serverBuilder =  serverBuilder;
-    }
-
-    public  static  FateServerBuilder   forNettyServerBuilderAddress(SocketAddress   socketAddress){
-
-       return   new FateServerBuilder( NettyServerBuilder.forAddress(socketAddress));
-
-    }
-
-    ServerBuilder serverBuilder;
-
-
-    public  FateServerBuilder maxConcurrentCallsPerConnection(int  count){
-
-        if(this.serverBuilder instanceof NettyServerBuilder){
-
-           this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).maxConcurrentCallsPerConnection(count);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).maxConcurrentCallsPerConnection(count);
         }
 
-        return  this;
+        return this;
 
     }
+
     @Override
-    public  FateServerBuilder maxInboundMessageSize(int  count){
+    public FateServerBuilder maxInboundMessageSize(int count) {
 //
 //        if(this.serverBuilder instanceof NettyServerBuilder){
 //
 //            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).maxInboundMessageSize(count);
 //        }
         this.serverBuilder.maxInboundMessageSize(count);
-        return  this;
+        return this;
 
     }
 
-    public  FateServerBuilder sslContext(    SslContext sslContext){
+    public FateServerBuilder sslContext(SslContext sslContext) {
 
-        if(this.serverBuilder instanceof NettyServerBuilder){
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).sslContext(sslContext);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).sslContext(sslContext);
         }
 
-        return  this;
+        return this;
 
 
     }
 
+    public FateServerBuilder flowControlWindow(int count) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-    public  FateServerBuilder flowControlWindow(int  count){
-        if(this.serverBuilder instanceof NettyServerBuilder){
-
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).flowControlWindow(count);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).flowControlWindow(count);
         }
-        return  this;
+        return this;
     }
 
-    public  FateServerBuilder keepAliveTime(int  count,TimeUnit timeUnit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
+    public FateServerBuilder keepAliveTime(int count, TimeUnit timeUnit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).keepAliveTime(count,timeUnit);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).keepAliveTime(count, timeUnit);
         }
-        return  this;
+        return this;
     }
 
-    public  FateServerBuilder keepAliveTimeout(int  count,TimeUnit timeUnit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
+    public FateServerBuilder keepAliveTimeout(int count, TimeUnit timeUnit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).keepAliveTimeout(count,timeUnit);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).keepAliveTimeout(count, timeUnit);
         }
-        return  this;
+        return this;
     }
 
+    public FateServerBuilder permitKeepAliveTime(int count, TimeUnit timeUnit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-    public  FateServerBuilder permitKeepAliveTime(int  count,TimeUnit timeUnit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
-
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).permitKeepAliveTime(count,timeUnit);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).permitKeepAliveTime(count, timeUnit);
         }
-        return  this;
+        return this;
     }
-
-    public  FateServerBuilder permitKeepAliveWithoutCalls(boolean  permit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
-
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).permitKeepAliveWithoutCalls(permit);
-        }
-        return  this;
-    }
-
-
 
 
 //                    .maxInboundMessageSize(32 << 20)
@@ -202,34 +175,39 @@ public class FateServerBuilder extends ServerBuilder {
 //            .maxConnectionAge(24, TimeUnit.HOURS)
 //                .maxConnectionAgeGrace(24, TimeUnit.HOURS);
 
-    public  FateServerBuilder maxConnectionAge(int  count ,TimeUnit timeUnit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).maxConnectionAge(count,timeUnit);
+    public FateServerBuilder permitKeepAliveWithoutCalls(boolean permit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
+
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).permitKeepAliveWithoutCalls(permit);
         }
-        return  this;
+        return this;
     }
 
-    public  FateServerBuilder maxConnectionAgeGrace(int  count ,TimeUnit timeUnit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).maxConnectionAgeGrace(count,timeUnit);
+    public FateServerBuilder maxConnectionAge(int count, TimeUnit timeUnit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).maxConnectionAge(count, timeUnit);
         }
-        return  this;
+        return this;
     }
 
-
-
+    public FateServerBuilder maxConnectionAgeGrace(int count, TimeUnit timeUnit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).maxConnectionAgeGrace(count, timeUnit);
+        }
+        return this;
+    }
 
     @Override
     public ServerBuilder directExecutor() {
 
-                serverBuilder.directExecutor();
-                return this;
+        serverBuilder.directExecutor();
+        return this;
 
     }
 
     @Override
     public FateServerBuilder executor(@Nullable Executor executor) {
-         serverBuilder.executor(executor);
+        serverBuilder.executor(executor);
         return this;
 
     }
@@ -237,61 +215,55 @@ public class FateServerBuilder extends ServerBuilder {
     @Override
     public FateServerBuilder addService(ServerServiceDefinition serverServiceDefinition) {
 
-        System.err.println("addService =====111="+serverServiceDefinition);
+        System.err.println("addService =====111=" + serverServiceDefinition);
 
-         prepareRegister(serverServiceDefinition);
-         serverBuilder.addService(serverServiceDefinition);
-         return  this;
+        prepareRegister(serverServiceDefinition);
+        serverBuilder.addService(serverServiceDefinition);
+        return this;
     }
 
-    public  FateServerBuilder maxConnectionIdle(int count,TimeUnit  timeUnit){
-        if(this.serverBuilder instanceof NettyServerBuilder){
+    public FateServerBuilder maxConnectionIdle(int count, TimeUnit timeUnit) {
+        if (this.serverBuilder instanceof NettyServerBuilder) {
 
-            this.serverBuilder =  ((NettyServerBuilder)this.serverBuilder).maxConnectionIdle(count,timeUnit);
+            this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).maxConnectionIdle(count, timeUnit);
         }
-        return  this;
+        return this;
     }
 
+    public FateServerBuilder addService(ServerServiceDefinition serverServiceDefinition, Class clazz) {
 
-    public FateServerBuilder addService(ServerServiceDefinition serverServiceDefinition,Class  clazz) {
-
-        System.err.println("addService =====111="+serverServiceDefinition);
+        System.err.println("addService =====111=" + serverServiceDefinition);
 
         prepareRegister(clazz);
         serverBuilder.addService(serverServiceDefinition);
-        return  this;
+        return this;
     }
-
-
 
     @Override
     public FateServerBuilder addService(BindableService bindableService) {
 
-        System.err.println("addService ======"+bindableService);
+        System.err.println("addService ======" + bindableService);
 
         prepareRegister(bindableService);
         serverBuilder.addService(bindableService);
         return this;
     }
 
-
-    private  void  prepareRegister (Object  service){
+    private void prepareRegister(Object service) {
         Method[] methods;
-        if(service instanceof  Class){
-            methods=((Class) service).getMethods();
-        }
-        else{
-            methods= service.getClass().getMethods();
+        if (service instanceof Class) {
+            methods = ((Class) service).getMethods();
+        } else {
+            methods = service.getClass().getMethods();
         }
 
-        for(Method method: methods) {
+        for (Method method : methods) {
             doRegister(method);
         }
 
     }
 
-
-    private   void  doRegister(Method method){
+    private void doRegister(Method method) {
 
         RegisterService registerService = method.getAnnotation(RegisterService.class);
 
@@ -305,13 +277,13 @@ public class FateServerBuilder extends ServerBuilder {
 
     @Override
     public ServerBuilder fallbackHandlerRegistry(@Nullable HandlerRegistry handlerRegistry) {
-         serverBuilder.fallbackHandlerRegistry(handlerRegistry);
-         return  this;
+        serverBuilder.fallbackHandlerRegistry(handlerRegistry);
+        return this;
     }
 
     @Override
     public ServerBuilder useTransportSecurity(File file, File file1) {
-        serverBuilder.useTransportSecurity(file,file1);
+        serverBuilder.useTransportSecurity(file, file1);
         return this;
     }
 
@@ -327,7 +299,6 @@ public class FateServerBuilder extends ServerBuilder {
         return this;
     }
 
-
     public String getZkRegisterLocation() {
         return zkRegisterLocation;
     }
@@ -337,8 +308,6 @@ public class FateServerBuilder extends ServerBuilder {
 
         return this;
     }
-
-    private  String  zkRegisterLocation;
 
     @Override
     public Server build() {
@@ -350,9 +319,8 @@ public class FateServerBuilder extends ServerBuilder {
         fateServer.setEnvironment(environment);
         fateServer.setProject(project);
 
-        return  fateServer;
+        return fateServer;
     }
-
 
 
 }

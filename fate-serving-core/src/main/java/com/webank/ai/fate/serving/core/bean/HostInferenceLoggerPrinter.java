@@ -24,9 +24,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
-public class HostInferenceLoggerPrinter implements  LoggerPrinter<Map,ReturnResult>{
+public class HostInferenceLoggerPrinter implements LoggerPrinter<Map, ReturnResult> {
 
-    static final   String  LOGGER_NAME =  "flow";
+    static final String LOGGER_NAME = "flow";
 
     private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
 
@@ -34,11 +34,11 @@ public class HostInferenceLoggerPrinter implements  LoggerPrinter<Map,ReturnResu
     public void printLog(Context context, Map req, ReturnResult resp) {
 
 
-                LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}",
-                        GetSystemInfo.getLocalIp(),  context.getSeqNo(),req != null ? ((Map) req).get(Dict.CASEID) : Dict.NONE, context.getActionType(), context.getCostTime(),
-                        resp != null ? resp.getRetcode() : Dict.NONE,WatchDog.get(), req,resp
-                );
+        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}",
+                GetSystemInfo.getLocalIp(), context.getSeqNo(), req != null ? ((Map) req).get(Dict.CASEID) : Dict.NONE, context.getActionType(), context.getCostTime(),
+                resp != null ? resp.getRetcode() : Dict.NONE, WatchDog.get(), req, resp
+        );
 
-        }
+    }
 }
 

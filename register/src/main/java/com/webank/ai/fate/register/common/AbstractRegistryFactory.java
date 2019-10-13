@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.webank.ai.fate.register.common.Constants.INTERFACE_KEY;
-import static com.webank.ai.fate.register.common.Constants.INTERFACE_KEY;
 
 
 public abstract class AbstractRegistryFactory implements RegistryFactory {

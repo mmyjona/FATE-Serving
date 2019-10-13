@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.serving.interfaces;
 
-public interface InferenceWorkerManager  {
+public interface InferenceWorkerManager {
 
-    public  void exetute(Runnable task);
+    public void exetute(Runnable task);
 }

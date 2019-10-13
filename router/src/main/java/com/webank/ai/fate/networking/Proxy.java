@@ -21,7 +21,6 @@ import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
-import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
@@ -32,8 +31,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -61,7 +58,7 @@ public class Proxy {
         CommandLine cmd = parser.parse(options, args);
 
         String confFilePath = cmd.getOptionValue("c");
-    //    String  confFilePath ="/Users/kaideng/work/webank/fate11dev/FATE/arch/networking/proxy/src/main/resources/proxy.properties";
+        //    String  confFilePath ="/Users/kaideng/work/webank/fate11dev/FATE/arch/networking/proxy/src/main/resources/proxy.properties";
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext-proxy.xml");
         LocalBeanFactory localBeanFactory = context.getBean(LocalBeanFactory.class);
         localBeanFactory.setApplicationContext(context);
@@ -76,17 +73,16 @@ public class Proxy {
         Properties properties = serverConf.getProperties();
 
 
+        useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
 
-        useRegister =Boolean.valueOf( properties.getProperty("useRegister","false"));
-
-        if(useRegister) {
-            String  zkUrl = properties.getProperty("zk.url");
+        if (useRegister) {
+            String zkUrl = properties.getProperty("zk.url");
             zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, "proxy", "online", serverConf.getPort());
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject("serving");
         }
 
-      //  List<URL> lists = zookeeperRegistry.lookup(URL.valueOf("proxy/online/unaryCall"));
+        //  List<URL> lists = zookeeperRegistry.lookup(URL.valueOf("proxy/online/unaryCall"));
 
 //        zookeeperRegistry.subscribe(URL.valueOf("proxy/online/unaryCall"),x->{
 //
@@ -95,7 +91,7 @@ public class Proxy {
 //        });
 
 
- //     System.err.println("caches========"+zookeeperRegistry.getCacheUrls(URL.valueOf("proxy/online/unaryCall")));
+        //     System.err.println("caches========"+zookeeperRegistry.getCacheUrls(URL.valueOf("proxy/online/unaryCall")));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
@@ -121,7 +117,6 @@ public class Proxy {
 
         server.awaitTermination();
     }
-
 
 
 }

@@ -50,25 +50,53 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class ServingServer implements InitializingBean{
+public class ServingServer implements InitializingBean {
     private static final Logger LOGGER = LogManager.getLogger();
-    private Server server;
-    private boolean  useRegister= false;
-
-
-    private String confPath="";
     static ApplicationContext applicationContext;
-    public  ServingServer(){
+    private Server server;
+    private boolean useRegister = false;
+    private String confPath = "";
 
-       // System.err.println("==============================");
+    public ServingServer() {
+
+        // System.err.println("==============================");
 
     }
 
     public ServingServer(String confPath) {
         this.confPath = new File(confPath).getAbsolutePath();
 
-        System.setProperty("configpath",confPath);
+        System.setProperty("configpath", confPath);
         new Configuration(confPath).load();
+    }
+
+    public static void main(String[] args) {
+        try {
+
+
+            Options options = new Options();
+            Option option = Option.builder("c")
+                    .longOpt("config")
+                    .argName("file")
+                    .required()
+                    .hasArg()
+                    .numberOfArgs(1)
+                    .desc("configuration file")
+                    .build();
+            options.addOption(option);
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = parser.parse(options, args);
+            ServingServer a = new ServingServer(cmd.getOptionValue("c"));
+
+            //  ServingServer a = new ServingServer("/Users/kaideng/work/webank/test/serving-server/conf/serving-server.properties");
+
+            a.start(args);
+
+
+            //a.blockUntilShutdown();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void start(String[] args) throws IOException {
@@ -76,31 +104,32 @@ public class ServingServer implements InitializingBean{
         applicationContext = SpringApplication.run(SpringConfig.class, args);
 
 
-        ApplicationHolder.applicationContext=  applicationContext;
+        ApplicationHolder.applicationContext = applicationContext;
         int port = Integer.parseInt(Configuration.getProperty(Dict.PROPERTY_SERVER_PORT));
         //TODO: Server custom configuration
-        Executor    executor= Executors.newCachedThreadPool();
-        FateServerBuilder serverBuilder =(FateServerBuilder)ServerBuilder.forPort(port);
+        Executor executor = Executors.newCachedThreadPool();
+        FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
         //new ServiceOverloadProtectionHandle()
-        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(InferenceService.class), new ServiceExceptionHandler(),new ServiceOverloadProtectionHandle() ),InferenceService.class);
-        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ModelService.class), new ServiceExceptionHandler(),new ServiceOverloadProtectionHandle()),ModelService.class);
-        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ProxyService.class), new ServiceExceptionHandler(),new ServiceOverloadProtectionHandle()),ProxyService.class);
+        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(InferenceService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), InferenceService.class);
+        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ModelService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
+        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ProxyService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
         server = serverBuilder.build();
 
         LOGGER.info("Server started listening on port: {}, use configuration: {}", port, this.confPath);
 
         server.start();
 
-        String  userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
+        String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
-        if(useRegister) {
+        LOGGER.info("useRegister {}", useRegister);
+        if (useRegister) {
 
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
-            //zookeeperRegistry.addDynamicEnvironment("10001");
-            BaseModel.routerService =  applicationContext.getBean(RouterService.class);
-            FateServer.serviceSets.forEach(servie->{
+
+            BaseModel.routerService = applicationContext.getBean(RouterService.class);
+            FateServer.serviceSets.forEach(servie -> {
                 try {
                     String serviceName = servie.serviceName();
                     String weightKey = serviceName + ".weight";
@@ -111,8 +140,8 @@ public class ServingServer implements InitializingBean{
                             zookeeperRegistry.getServieWeightMap().put(weightKey, weight);
                         }
                     }
-                }catch(Throwable e){
-                    LOGGER.error("parse interface weight error",e);
+                } catch (Throwable e) {
+                    LOGGER.error("parse interface weight error", e);
                 }
 
             });
@@ -187,33 +216,6 @@ public class ServingServer implements InitializingBean{
             }
         }).start();
         LOGGER.info("Finish init client pool");
-    }
-
-    public static void main(String[] args) {
-        try {
-
-
-            Options options = new Options();
-            Option option = Option.builder("c")
-                    .longOpt("config")
-                    .argName("file")
-                    .required()
-                    .hasArg()
-                    .numberOfArgs(1)
-                    .desc("configuration file")
-                    .build();
-            options.addOption(option);
-            CommandLineParser parser = new DefaultParser();
-            CommandLine cmd = parser.parse(options, args);
-            ServingServer a = new ServingServer(cmd.getOptionValue("c"));
-
-            a.start(args);
-
-
-            //a.blockUntilShutdown();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     @Override

@@ -24,14 +24,14 @@ import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 public abstract class HeteroLR extends BaseModel {
+    private static final Logger LOGGER = LogManager.getLogger();
     private Map<String, Double> weight;
     private Double intercept;
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -75,7 +75,7 @@ public abstract class HeteroLR extends BaseModel {
         try {
             modelWeightHitRate = (double) modelWeightHitCount / weightNum;
             inputDataHitRate = (double) inputDataHitCount / inputFeaturesNum;
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -91,5 +91,5 @@ public abstract class HeteroLR extends BaseModel {
     }
 
     @Override
-    public abstract Map<String, Object> handlePredict(Context context , List<Map<String, Object> > inputData, FederatedParams predictParams);
+    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
 }

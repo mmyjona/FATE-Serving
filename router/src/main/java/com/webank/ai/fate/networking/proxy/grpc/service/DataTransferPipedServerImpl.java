@@ -27,7 +27,6 @@ import com.webank.ai.fate.networking.proxy.util.ErrorUtils;
 import com.webank.ai.fate.networking.proxy.util.Timeouts;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import com.webank.ai.fate.register.annotions.RegisterService;
-import com.webank.ai.fate.register.common.Constants;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -58,7 +57,8 @@ public class DataTransferPipedServerImpl extends DataTransferServiceGrpc.DataTra
     private ErrorUtils errorUtils;
     private Pipe defaultPipe;
     private PipeFactory pipeFactory;
-    @RegisterService(serviceName="push"  )
+
+    @RegisterService(serviceName = "push")
     @Override
     public StreamObserver<Proxy.Packet> push(StreamObserver<Proxy.Metadata> responseObserver) {
         LOGGER.info("[PUSH][SERVER] request received");
@@ -79,7 +79,7 @@ public class DataTransferPipedServerImpl extends DataTransferServiceGrpc.DataTra
     }
 
     @Override
-    @RegisterService(serviceName="pull")
+    @RegisterService(serviceName = "pull")
     public void pull(Proxy.Metadata inputMetadata, StreamObserver<Proxy.Packet> responseObserver) {
         String oneLineStringInputMetadata = toStringUtils.toOneLineString(inputMetadata);
         LOGGER.info("[PULL][SERVER] request received. metadata: {}",
@@ -182,7 +182,7 @@ public class DataTransferPipedServerImpl extends DataTransferServiceGrpc.DataTra
     }
 
     @Override
-    @RegisterService(serviceName="unaryCall")
+    @RegisterService(serviceName = "unaryCall")
     public void unaryCall(Proxy.Packet request, StreamObserver<Proxy.Packet> responseObserver) {
         Proxy.Metadata inputMetadata = request.getHeader();
         String oneLineStringInputMetadata = toStringUtils.toOneLineString(inputMetadata);

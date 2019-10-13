@@ -21,40 +21,34 @@ import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
-
 import com.webank.ai.fate.core.bean.ReturnResult;
 import com.webank.ai.fate.core.constant.StatusCode;
 import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.bean.BaseContext;
-import com.webank.ai.fate.serving.core.monitor.WatchDog;
 import com.webank.ai.fate.serving.host.HostInferenceProvider;
-
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 @Service
 public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
     private static final Logger logger = LogManager.getLogger();
     @Autowired
-    HostInferenceProvider  hostInferenceProvider;
+    HostInferenceProvider hostInferenceProvider;
 
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
-        ReturnResult responseResult=null;
+        ReturnResult responseResult = null;
         Context context = new BaseContext(new HostInferenceLoggerPrinter());
         context.setActionType(req.getHeader().getCommand().getName());
         context.preProcess();
         //Map<String, Object> requestData=null;
-        HostFederatedParams  requestData =  null;
+        HostFederatedParams requestData = null;
 
         try {
             //requestData = (Map<String, Object>) ObjectTransform.json2Bean(req.getBody().getValue().toStringUtf8(), HashMap.class);
@@ -63,12 +57,12 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
             // "role":{"allRole":{"host":["10000"],"guest":["9999"]}},"seqNo":"1b91bb3621704dc3bf4e63a1ed22e81d"}
 
 
-            String data =  req.getBody().getValue().toStringUtf8();
-            logger.info("unaryCall {}",data);
+            String data = req.getBody().getValue().toStringUtf8();
+            logger.info("unaryCall {}", data);
 
-            requestData =  JSON.parseObject(data,HostFederatedParams.class);
+            requestData = JSON.parseObject(data, HostFederatedParams.class);
 
-            context.setCaseId(requestData.getCaseId()!=null?requestData.getCaseId():Dict.NONE);
+            context.setCaseId(requestData.getCaseId() != null ? requestData.getCaseId() : Dict.NONE);
 
             switch (req.getHeader().getCommand().getName()) {
                 case Dict.FEDERATED_INFERENCE:
@@ -92,8 +86,8 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
             Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
 
-            FederatedParty  partnerParty = requestData.getPartnerLocal();
-            FederatedParty  party = requestData.getLocal();
+            FederatedParty partnerParty = requestData.getPartnerLocal();
+            FederatedParty party = requestData.getLocal();
 
 
 //            FederatedParty partnerParty = (FederatedParty) ObjectTransform.json2Bean(requestData.get("partner_local").toString(), FederatedParty.class);
@@ -112,8 +106,8 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
             packetBuilder.setHeader(metaDataBuilder.build());
             responseObserver.onNext(packetBuilder.build());
             responseObserver.onCompleted();
-        }finally {
-            context.postProcess(requestData,responseResult);
+        } finally {
+            context.postProcess(requestData, responseResult);
 
         }
     }

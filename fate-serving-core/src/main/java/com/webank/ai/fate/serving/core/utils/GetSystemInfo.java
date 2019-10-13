@@ -17,26 +17,25 @@
 package com.webank.ai.fate.serving.core.utils;
 
 
-
 import com.sun.management.OperatingSystemMXBean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryPoolMXBean;
-import java.net.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.List;
 
 public class GetSystemInfo {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
 
-    public static  String  localIp;
+    public static String localIp;
 
-    static  {
+    static {
         localIp = getLocalIp();
     }
 
@@ -46,23 +45,23 @@ public class GetSystemInfo {
         String ip;
 
         try {
-        if (sysType.toLowerCase().startsWith("win")) {
-            String localIP = null;
+            if (sysType.toLowerCase().startsWith("win")) {
+                String localIP = null;
 
                 localIP = InetAddress.getLocalHost().getHostAddress();
 
-            if (localIP != null) {
-                return localIP;
-            }
-        } else {
-            ip = getIpByEthNum("eth0");
-            if (ip != null) {
-                return ip;
+                if (localIP != null) {
+                    return localIP;
+                }
+            } else {
+                ip = getIpByEthNum("eth0");
+                if (ip != null) {
+                    return ip;
 
 
+                }
             }
-        }
-        } catch (Throwable  e) {
+        } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
         return "";
@@ -141,9 +140,5 @@ public class GetSystemInfo {
     }
 
 
-
-
-
-
-}  
+}
 

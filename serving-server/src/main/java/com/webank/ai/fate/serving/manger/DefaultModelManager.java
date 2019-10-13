@@ -16,9 +16,6 @@
 
 package com.webank.ai.fate.serving.manger;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
-
 import com.webank.ai.fate.core.bean.ReturnResult;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.provider.FateServer;
@@ -39,49 +36,42 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.io.*;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
+import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-public class DefaultModelManager implements ModelManager,InitializingBean{
-    private  Map<String, String> appNamespaceMap;
-    private  Map<String, FederatedParty>  modelFederatedParty;
-    private  Map<String, FederatedRoles>  modelFederatedRoles;
-
-
-    private  Map<String, ModelNamespaceData> modelNamespaceDataMap;
-    private  ReentrantReadWriteMapPool<String, String> appNamespaceMapPool;
-    private  ReentrantReadWriteMapPool<String, ModelNamespaceData> modelNamespaceDataMapPool;
-    @Autowired
-    private ModelCache modelCache;
-    private  ConcurrentHashMap<String, ModelInfo> partnerModelData;
-    private  final Logger logger = LogManager.getLogger();
+public class DefaultModelManager implements ModelManager, InitializingBean {
+    private final Logger logger = LogManager.getLogger();
     private final AtomicLong lastCacheChanged = new AtomicLong();
     @Autowired(required = false)
-    ZookeeperRegistry  zookeeperRegistry;
-    private  File  modelFile;
+    ZookeeperRegistry zookeeperRegistry;
+    private Map<String, String> appNamespaceMap;
+    private Map<String, FederatedParty> modelFederatedParty;
+    private Map<String, FederatedRoles> modelFederatedRoles;
+    private Map<String, ModelNamespaceData> modelNamespaceDataMap;
+    private ReentrantReadWriteMapPool<String, String> appNamespaceMapPool;
+    private ReentrantReadWriteMapPool<String, ModelNamespaceData> modelNamespaceDataMapPool;
+    @Autowired
+    private ModelCache modelCache;
+    private ConcurrentHashMap<String, ModelInfo> partnerModelData;
+    private File modelFile;
 
-    public   DefaultModelManager(){
+    public DefaultModelManager() {
 
         appNamespaceMap = new HashMap<>();
         modelNamespaceDataMap = new HashMap<>();
         appNamespaceMapPool = new ReentrantReadWriteMapPool<>(appNamespaceMap);
         modelNamespaceDataMapPool = new ReentrantReadWriteMapPool<>(modelNamespaceDataMap);
         partnerModelData = new ConcurrentHashMap<>();
-        modelFederatedParty =  new HashMap<>();
+        modelFederatedParty = new HashMap<>();
         modelFederatedRoles = new HashMap<>();
 
 
-        String filename =  System.getProperty(Dict.PROPERTY_USER_HOME) + "/.fate/fate-model.cache";
+        String filename = System.getProperty(Dict.PROPERTY_USER_HOME) + "/.fate/fate-model.cache";
         File file = null;
         if (StringUtils.isNotEmpty(filename)) {
             file = new File(filename);
@@ -95,10 +85,15 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
 
     }
 
+    public static void main(String[] args) {
 
+        URL serviceUrl = URL.valueOf("grpc://" + "127.0.0.1" + ":" + 1235 + Constants.PATH_SEPARATOR + "kkkkk");
+
+
+    }
 
     @Override
-    public  ReturnResult publishLoadModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
+    public ReturnResult publishLoadModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
         String role = federatedParty.getRole();
         String partyId = federatedParty.getPartyId();
         ReturnResult returnResult = new ReturnResult();
@@ -121,7 +116,7 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
             }
             federatedRolesModel.forEach((roleName, roleModelInfo) -> {
                 roleModelInfo.forEach((p, m) -> {
-                    if (!p.equals(partyId)||(p.equals(partyId)&&!role.equals(roleName))) {
+                    if (!p.equals(partyId) || (p.equals(partyId) && !role.equals(roleName))) {
                         String partnerModelKey = ModelUtils.genModelKey(m.getName(), m.getNamespace());
                         partnerModelData.put(partnerModelKey, modelInfo);
                         logger.info("Create model index({}) for partner({}, {})", partnerModelKey, roleName, p);
@@ -139,7 +134,7 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
     }
 
     @Override
-    public  ReturnResult publishOnlineModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
+    public ReturnResult publishOnlineModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
         String role = federatedParty.getRole();
         String partyId = federatedParty.getPartyId();
         ReturnResult returnResult = new ReturnResult();
@@ -150,17 +145,16 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
             return returnResult;
         }
 
-        String  modelKey =  ModelUtils.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
+        String modelKey = ModelUtils.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
         PipelineTask model = modelCache.get(modelKey);
         if (model == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model by these information.");
             return returnResult;
         }
-        modelFederatedParty.put(modelKey,federatedParty);
+        modelFederatedParty.put(modelKey, federatedParty);
 
-        modelFederatedRoles.put(modelKey,federatedRoles);
-
+        modelFederatedRoles.put(modelKey, federatedRoles);
 
 
         try {
@@ -171,7 +165,7 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
             logger.info("Enable model {} for namespace {} success", modelName, modelNamespace);
             logger.info("Get model namespace {} for app {}", modelNamespace, partyId);
             returnResult.setRetcode(InferenceRetCode.OK);
-            if(zookeeperRegistry!=null) {
+            if (zookeeperRegistry != null) {
                 zookeeperRegistry.addDynamicEnvironment(partyId);
                 zookeeperRegistry.register(FateServer.serviceSets);
             }
@@ -183,34 +177,26 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
         }
         return returnResult;
     }
+
     @Override
-    public  PipelineTask getModel(String name, String namespace) {
+    public PipelineTask getModel(String name, String namespace) {
         return modelCache.get(ModelUtils.genModelKey(name, namespace));
     }
+
     @Override
-    public  ModelNamespaceData getModelNamespaceData(String namespace) {
+    public ModelNamespaceData getModelNamespaceData(String namespace) {
         return modelNamespaceDataMapPool.get(namespace);
     }
+
     @Override
-    public  String getModelNamespaceByPartyId(String partyId) {
+    public String getModelNamespaceByPartyId(String partyId) {
         return appNamespaceMapPool.get(partyId);
     }
 
     @Override
-    public  ModelInfo getModelInfoByPartner(String partnerModelName, String partnerModelNamespace) {
+    public ModelInfo getModelInfoByPartner(String partnerModelName, String partnerModelNamespace) {
         return partnerModelData.get(ModelUtils.genModelKey(partnerModelName, partnerModelNamespace));
     }
-    @Override
-    public  PipelineTask pushModelIntoPool(String name, String namespace) {
-        PipelineTask model = ModelUtils.loadModel(name, namespace);
-        if (model == null) {
-            return null;
-        }
-        modelCache.put(ModelUtils.genModelKey(name, namespace), model);
-        logger.info("Load model success, name: {}, namespace: {}, model cache size is {}", name, namespace, modelCache.getSize());
-        return model;
-    }
-
 
 
 //
@@ -467,35 +453,33 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
 //
 //    }
 
+    @Override
+    public PipelineTask pushModelIntoPool(String name, String namespace) {
+        PipelineTask model = ModelUtils.loadModel(name, namespace);
+        if (model == null) {
+            return null;
+        }
+        modelCache.put(ModelUtils.genModelKey(name, namespace), model);
+        logger.info("Load model success, name: {}, namespace: {}, model cache size is {}", name, namespace, modelCache.getSize());
+        return model;
+    }
 
-
-
-    private  FederatedRoles   parseFederatedRoles(Map  data){
+    private FederatedRoles parseFederatedRoles(Map data) {
 
         return null;
 
     }
 
-    private  FederatedParty   parseFederatedParty(Map  data){
+    private FederatedParty parseFederatedParty(Map data) {
 
         return null;
 
 
     }
 
-    private ModelInfo   parseModelInfo(Map data){
-
-        return  null;
-    }
-
-
-
-    private  ModelNamespaceData  parseModelNamespaceData(Map data){
-
-
+    private ModelInfo parseModelInfo(Map data) {
 
         return null;
-
     }
 
 //    private  void  test(){
@@ -521,23 +505,17 @@ public class DefaultModelManager implements ModelManager,InitializingBean{
 //
 //    }
 
+    private ModelNamespaceData parseModelNamespaceData(Map data) {
+
+
+        return null;
+
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-      //  test();
-
-
-
-
-    }
-
-
-    public  static  void main(String[]  args){
-
-        URL serviceUrl = URL.valueOf("grpc://" + "127.0.0.1" + ":" + 1235 + Constants.PATH_SEPARATOR + "kkkkk");
-
-
+        //  test();
 
 
     }

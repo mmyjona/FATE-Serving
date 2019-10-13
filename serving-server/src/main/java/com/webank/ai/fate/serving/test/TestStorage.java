@@ -17,18 +17,10 @@
 package com.webank.ai.fate.serving.test;
 
 import com.google.common.collect.Maps;
-import com.google.protobuf.ByteString;
-import com.webank.ai.fate.api.eggroll.storage.KVServiceGrpc;
-import com.webank.ai.fate.api.eggroll.storage.Kv;
-import com.webank.ai.fate.api.eggroll.storage.StorageBasic;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-import com.webank.ai.fate.core.constant.MetaConstants.CompositeHeaderKey;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -69,27 +61,25 @@ public class TestStorage {
 //        }
 
 
-
-
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8000).usePlaintext().build();
 
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(channel);
 
         blockingStub = blockingStub.withDeadlineAfter(3000, TimeUnit.MILLISECONDS);
 
-        ModelServiceProto.PublishRequest.Builder  publishRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
+        ModelServiceProto.PublishRequest.Builder publishRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
 
 
-        Map<String, ModelServiceProto.Party>  role = Maps.newHashMap();
-        role.put("3333333",ModelServiceProto.Party.newBuilder().addPartyId("10001").build());
+        Map<String, ModelServiceProto.Party> role = Maps.newHashMap();
+        role.put("3333333", ModelServiceProto.Party.newBuilder().addPartyId("10001").build());
 
-        Map<String, ModelServiceProto.RoleModelInfo>  models = Maps.newHashMap();
-        Map<String, ModelServiceProto.ModelInfo>  modelInfoMap =Maps.newHashMap();
+        Map<String, ModelServiceProto.RoleModelInfo> models = Maps.newHashMap();
+        Map<String, ModelServiceProto.ModelInfo> modelInfoMap = Maps.newHashMap();
 
-        modelInfoMap.put("555555",ModelServiceProto.ModelInfo.newBuilder().setNamespace("mynamespace").setTableName("mytablename").build());
+        modelInfoMap.put("555555", ModelServiceProto.ModelInfo.newBuilder().setNamespace("mynamespace").setTableName("mytablename").build());
 
-        models.put("4444444444",ModelServiceProto.RoleModelInfo.newBuilder().putAllRoleModelInfo(modelInfoMap).build());
-        ModelServiceProto.LocalInfo   localInfo = ModelServiceProto.LocalInfo.newBuilder().setPartyId("10001").setRole("Guest").build();
+        models.put("4444444444", ModelServiceProto.RoleModelInfo.newBuilder().putAllRoleModelInfo(modelInfoMap).build());
+        ModelServiceProto.LocalInfo localInfo = ModelServiceProto.LocalInfo.newBuilder().setPartyId("10001").setRole("Guest").build();
         publishRequestBuilder.setLocal(localInfo);
         publishRequestBuilder.putAllRole(role);
         publishRequestBuilder.putAllModel(models);
@@ -97,7 +87,7 @@ public class TestStorage {
         publishRequestBuilder.build();
 
 
-       System.err.println( blockingStub.publishLoad( publishRequestBuilder.build()));
+        System.err.println(blockingStub.publishLoad(publishRequestBuilder.build()));
 
     }
 }

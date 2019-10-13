@@ -17,10 +17,10 @@
 package com.webank.ai.fate.serving.core.manager;
 
 
-import java.util.Arrays;
-
 import com.webank.ai.fate.serving.core.bean.FederatedRoles;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
 
 public class SceneUtils {
     private static final String sceneKeySeparator = "#";
