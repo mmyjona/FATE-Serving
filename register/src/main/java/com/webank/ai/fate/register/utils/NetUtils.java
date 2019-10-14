@@ -35,6 +35,15 @@ import static com.webank.ai.fate.register.common.Constants.*;
  */
 public class NetUtils {
 
+    public static void main(String[] args) {
+        System.out.println(NetUtils.getLocalHost());
+        System.out.println(NetUtils.getAvailablePort());
+        System.out.println(NetUtils.getLocalAddress());
+        System.out.println(NetUtils.getLocalIp());
+        System.out.println(NetUtils.getIpByHost("127.0.0.1"));
+        System.out.println(NetUtils.getLocalAddress0("127.0.0.1"));
+    }
+
     private static final Logger logger = LogManager.getLogger();
     // returned port range is [30000, 39999]
     private static final int RND_PORT_START = 30000;
