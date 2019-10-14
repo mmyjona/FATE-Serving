@@ -17,7 +17,7 @@
 package com.webank.ai.fate.jmx.server;
 
 import com.webank.ai.fate.jmx.mbean.Sample;
-import com.webank.ai.fate.jmx.util.IpAddressUtil;
+import com.webank.ai.fate.jmx.util.GetSystemInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,7 +72,7 @@ public class FateMBeanServer {
 
     public String openJMXServer(String serverName, int port) throws IOException {
         LocateRegistry.createRegistry(port);
-        String url = "service:jmx:rmi:///jndi/rmi://" + IpAddressUtil.getInnetIp() + ":" + port + "/" + serverName;
+        String url = "service:jmx:rmi:///jndi/rmi://" + GetSystemInfo.getLocalIp() + ":" + port + "/" + serverName;
         JMXServiceURL jmxServiceURL = new JMXServiceURL(url);
         jmxConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null, mBeanServer);
         jmxConnectorServer.start();
