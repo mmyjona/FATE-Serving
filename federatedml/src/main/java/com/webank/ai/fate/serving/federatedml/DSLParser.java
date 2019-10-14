@@ -120,7 +120,7 @@ public class DSLParser {
                     for (int j = 0; j < data.length(); j++) {
                         String upComponent = data.getString(j).split("\\.", -1)[0];
                         int upComponentId = -1;
-                        if (!upComponent.equals("args")) {
+                        if (!"args".equals(upComponent)) {
                             upComponentId = componentIndexMapping.get(upComponent);
                         }
 
