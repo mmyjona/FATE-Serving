@@ -76,7 +76,6 @@ public class FateMBeanServer {
         JMXServiceURL jmxServiceURL = new JMXServiceURL(url);
         jmxConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null, mBeanServer);
         jmxConnectorServer.start();
-
         LOGGER.info("JMX Server started listening on port: {}, url: {}", port, url);
         return url;
     }

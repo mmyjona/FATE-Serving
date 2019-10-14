@@ -59,8 +59,6 @@ public class ServingServer implements InitializingBean {
 
     public ServingServer() {
 
-        // System.err.println("==============================");
-
     }
 
     public ServingServer(String confPath) {
@@ -87,13 +85,7 @@ public class ServingServer implements InitializingBean {
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
             ServingServer a = new ServingServer(cmd.getOptionValue("c"));
-
-            //  ServingServer a = new ServingServer("/Users/kaideng/work/webank/test/serving-server/conf/serving-server.properties");
-
             a.start(args);
-
-
-            //a.blockUntilShutdown();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -122,7 +114,7 @@ public class ServingServer implements InitializingBean {
 
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
-        LOGGER.info("useRegister {}", useRegister);
+        LOGGER.info("serving useRegister {}", useRegister);
         if (useRegister) {
 
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
@@ -153,8 +145,6 @@ public class ServingServer implements InitializingBean {
                 int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
                 FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
                 String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-                // service:jmx:rmi:///jndi/rmi://127.0.0.1:9999/serving
-                // /FATE-SERVICES/jmx/providers/service:jmx:rmi:///jndi/rmi://10.56.224.80:9999/serving
                 URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
                 zookeeperRegistry.register(jmxUrl);
             }
@@ -201,23 +191,23 @@ public class ServingServer implements InitializingBean {
     }
 
     private void initialize() {
-        this.initializeClientPool();
+       // this.initializeClientPool();
         HttpClientPool.initPool();
         InferenceWorkerManager.prestartAllCoreThreads();
     }
 
-    private void initializeClientPool() {
-        ArrayList<String> serverAddress = new ArrayList<>();
-        serverAddress.add(Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS));
-        serverAddress.add(Configuration.getProperty(Dict.PROPERTY_ROLL_ADDRESS));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                GrpcClientPool.initPool(serverAddress);
-            }
-        }).start();
-        LOGGER.info("Finish init client pool");
-    }
+//    private void initializeClientPool() {
+//        ArrayList<String> serverAddress = new ArrayList<>();
+//        serverAddress.add(Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS));
+//        serverAddress.add(Configuration.getProperty(Dict.PROPERTY_ROLL_ADDRESS));
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                GrpcClientPool.initPool(serverAddress);
+//            }
+//        }).start();
+//        LOGGER.info("Finish init client pool");
+//    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
