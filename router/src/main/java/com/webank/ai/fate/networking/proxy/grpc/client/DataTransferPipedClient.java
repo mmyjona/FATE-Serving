@@ -31,10 +31,12 @@ import com.webank.ai.fate.networking.proxy.service.ConfFileBasedFdnRouter;
 import com.webank.ai.fate.networking.proxy.service.FdnRouter;
 import com.webank.ai.fate.networking.proxy.util.ErrorUtils;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
+import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import io.grpc.stub.StreamObserver;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -220,16 +222,16 @@ public class DataTransferPipedClient {
 
         DataTransferServiceGrpc.DataTransferServiceStub stub = null;
 
-        String useRegisterString = serverConf.getProperties().getProperty("useRegister", "false");
+        String useZkRouterString = serverConf.getProperties().getProperty("useZkRouter", "false");
 
-        boolean useRegister = Boolean.valueOf(useRegisterString);
+        boolean useZkRouter = Boolean.valueOf(useZkRouterString);
 
-        if (fdnRouter instanceof ConfFileBasedFdnRouter && useRegister) {
+        if (fdnRouter instanceof ConfFileBasedFdnRouter && useZkRouter) {
 
             ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
             Map<String, Map<String, List<BasicMeta.Endpoint>>> routerTable = confFileBasedFdnRouter.getRouteTable();
 
-            if (routerTable.containsKey(to.getPartyId()) && "serving".equals(to.getRole())) {
+            if (routerTable.containsKey(to.getPartyId()) && "serving-1.0".equals(to.getRole())) {
 
                 stub = routerByServiceRegister(from, to, pack);
                 if (stub != null) {
@@ -295,8 +297,14 @@ public class DataTransferPipedClient {
         String role = to.getRole();
         String name = to.getName();
         String serviceName = pack.getHeader().getCommand().getName();
+        String version = pack.getHeader().getOperator();
 
-        List<URL> urls = routerService.router(URL.valueOf(role + "/" + partId + "/" + serviceName));
+        URL paramUrl = URL.valueOf(role + "/" + partId + "/" + serviceName);
+        if(StringUtils.isNotEmpty(version)) {
+            paramUrl= paramUrl.addParameter(Constants.VERSION_KEY,version
+            );
+        }
+        List<URL> urls = routerService.router(paramUrl);
 
         if (CollectionUtils.isNotEmpty(urls)) {
             URL url = urls.get(0);

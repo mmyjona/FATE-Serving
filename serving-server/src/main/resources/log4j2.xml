@@ -146,6 +146,7 @@
 
 
         <AsyncRoot level="debug" includeLocation="true">
+            <!--<AppenderRef ref="Console" level="debug"/>-->
             <AppenderRef ref="info" level="debug"/>
             <AppenderRef ref="ErrorLog" level="error"/>
         </AsyncRoot>

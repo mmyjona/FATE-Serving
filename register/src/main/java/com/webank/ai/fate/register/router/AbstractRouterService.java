@@ -27,6 +27,7 @@ import com.webank.ai.fate.register.loadbalance.LoadBalancer;
 import com.webank.ai.fate.register.loadbalance.LoadBalancerFactory;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,6 +76,12 @@ public abstract class AbstractRouterService implements RouterService {
 
     protected List<URL> filterVersion(List<URL> urls, String version) {
 
+        if(StringUtils.isEmpty(version)){
+
+            return urls;
+
+        }
+
         final List<URL> resultUrls = Lists.newArrayList();
 
         if (CollectionUtils.isNotEmpty(urls)) {
@@ -84,7 +91,14 @@ public abstract class AbstractRouterService implements RouterService {
                 String targetVersion = url.getParameter(Constants.VERSION_KEY);
                 String routerModel = url.getParameter(Constants.ROUTER_MODEL);
 
+
                 try {
+
+
+                    if(RouterModel.ALL_ALLOWED.name().equals(routerModel)){
+                        resultUrls.add(url);
+                        return;
+                    }
                     Double targetVersionValue = Double.parseDouble(targetVersion);
                     Double versionValue = Double.parseDouble(version);
 
@@ -111,6 +125,7 @@ public abstract class AbstractRouterService implements RouterService {
                     }
                 } catch (Exception e) {
                     throw new IllegalArgumentException("parse version error");
+
                 }
             });
         }

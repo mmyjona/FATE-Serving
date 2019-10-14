@@ -23,16 +23,20 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.bean.ReturnResult;
 import com.webank.ai.fate.core.utils.Configuration;
 import com.webank.ai.fate.core.utils.ObjectTransform;
+import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> {
 
@@ -183,6 +187,8 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
+            String version =  Configuration.getProperty(Dict.VERSION,"");
+            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
             packetBuilder.setHeader(metaDataBuilder.build());
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
             String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
@@ -191,7 +197,10 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             if (!routerByzk) {
                 address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             } else {
-                List<URL> urls = routerService.router(URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL));
+
+                URL url = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
+                URL newUrl =url.addParameter(Constants.VERSION_KEY,version);
+                List<URL> urls = routerService.router(newUrl);
                 if (urls.size() > 0) {
                     URL url = urls.get(0);
                     String ip = url.getAddress();
@@ -218,8 +227,39 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             LOGGER.info("caseid {} getFederatedPredictFromRemote cost {} remote retcode {}", context.getCaseId(), cost, remoteResult != null ? remoteResult.getRetcode() : Dict.NONE);
         }
 
+    }
+
+
+    public  static  void main(String[] args){
+
+
+        NettyChannelBuilder builder = NettyChannelBuilder
+                .forAddress("localhost", 8000)
+                .keepAliveTime(6, TimeUnit.MINUTES)
+                .keepAliveTimeout(1, TimeUnit.HOURS)
+                .keepAliveWithoutCalls(true)
+                .idleTimeout(1, TimeUnit.HOURS)
+                .perRpcBufferLimit(128 << 20)
+                .flowControlWindow(32 << 20)
+                .maxInboundMessageSize(32 << 20)
+                .enableRetry()
+                .retryBufferSize(16 << 20)
+                .maxRetryAttempts(20);      // todo: configurable
+
+
+        builder.negotiationType(NegotiationType.PLAINTEXT)
+                .usePlaintext();
+        Proxy.Packet.Builder  packetBuilder =Proxy.Packet.newBuilder();
+            DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(builder.build());
+            Proxy.Packet packet = stub1.unaryCall(packetBuilder.build());
+        ReturnResult  remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
+
+
 
     }
+
+
+
 
 
 }

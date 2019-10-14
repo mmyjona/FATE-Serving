@@ -40,6 +40,7 @@ public class Dict {
     public static final String PARTNER_MODEL_DATA = "partner_model_index";
     public static final String MODEL_FEDERATED_PARTY = "model_federated_party";
     public static final String MODEL_FEDERATED_ROLES = "model_federated_roles";
+    public static final String VERSION ="version";
 
     // configuration property key
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL = "remoteModelInferenceResultCacheTTL";
@@ -59,7 +60,7 @@ public class Dict {
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = "remoteModelInferenceResultCacheSwitch";
     public static final String PROPERTY_CAN_CACHE_RET_CODE = "canCacheRetcode";
     public static final String PROPERTY_SERVICE_ROLE_NAME = "serviceRoleName";
-    public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving";
+    public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving-1.0";
     public static final String PROPERTY_ONLINE_DATA_ACCESS_ADAPTER = "OnlineDataAccessAdapter";
     public static final String PROPERTY_MODEL_CACHE_ACCESS_TTL = "modelCacheAccessTTL";
     public static final String PROPERTY_MODEL_CACHE_MAX_SIZE = "modelCacheMaxSize";
