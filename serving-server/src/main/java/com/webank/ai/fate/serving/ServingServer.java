@@ -59,21 +59,16 @@ public class ServingServer implements InitializingBean {
 
     public ServingServer() {
 
-        // System.err.println("==============================");
-
     }
 
     public ServingServer(String confPath) {
         this.confPath = new File(confPath).getAbsolutePath();
-
         System.setProperty("configpath", confPath);
         new Configuration(confPath).load();
     }
 
     public static void main(String[] args) {
         try {
-
-
             Options options = new Options();
             Option option = Option.builder("c")
                     .longOpt("config")
@@ -87,13 +82,7 @@ public class ServingServer implements InitializingBean {
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
             ServingServer a = new ServingServer(cmd.getOptionValue("c"));
-
-            //  ServingServer a = new ServingServer("/Users/kaideng/work/webank/test/serving-server/conf/serving-server.properties");
-
             a.start(args);
-
-
-            //a.blockUntilShutdown();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
