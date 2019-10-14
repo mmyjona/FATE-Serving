@@ -114,7 +114,7 @@ public class ServingServer implements InitializingBean {
 
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
-        LOGGER.info("useRegister {}", useRegister);
+        LOGGER.info("serving useRegister {}", useRegister);
         if (useRegister) {
 
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
@@ -145,8 +145,6 @@ public class ServingServer implements InitializingBean {
                 int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
                 FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
                 String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-                // service:jmx:rmi:///jndi/rmi://127.0.0.1:9999/serving
-                // /FATE-SERVICES/jmx/providers/service:jmx:rmi:///jndi/rmi://10.56.224.80:9999/serving
                 URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
                 zookeeperRegistry.register(jmxUrl);
             }
