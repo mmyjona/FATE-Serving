@@ -33,6 +33,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
+import com.webank.ai.fate.serving.core.bean.CacheManager;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

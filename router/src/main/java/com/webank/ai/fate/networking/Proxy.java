@@ -17,6 +17,7 @@
 package com.webank.ai.fate.networking;
 
 import com.google.common.collect.Sets;
+import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
@@ -31,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import java.util.Set;
 
@@ -80,6 +82,16 @@ public class Proxy {
             zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, "proxy", "online", serverConf.getPort());
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject("serving");
+
+            boolean useJMX = Boolean.valueOf(properties.getProperty("useJMX", "false"));
+            if (useJMX) {
+                String jmxServerName = properties.getProperty("jmx.server.name", "proxy");
+                int jmxPort = Integer.valueOf(System.getProperty("jmx.port", "9999"));
+                FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
+                String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
+                URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
+                zookeeperRegistry.register(jmxUrl);
+            }
         }
 
         //  List<URL> lists = zookeeperRegistry.lookup(URL.valueOf("proxy/online/unaryCall"));

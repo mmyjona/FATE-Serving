@@ -126,6 +126,7 @@ public class Dict {
     public static final String USE_REGISTER = "useRegister";
     public static final String USE_JMX = "useJMX";
     public static final String JMX_SERVER_NAME = "jmx.server.name";
+    public static final String JMX_PORT = "jmx.port";
 
 
 }

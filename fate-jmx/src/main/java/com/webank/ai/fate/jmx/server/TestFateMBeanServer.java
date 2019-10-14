@@ -27,7 +27,13 @@ public class TestFateMBeanServer {
         try {
             FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), false);
             fateMBeanServer.registerMBean(new Sample(), new ObjectName("com.webank.ai.fate.jmx:name=sample,type=standard"));
-            fateMBeanServer.openJMXServer("fate");
+
+            // use default domain
+//            FateMBeanServer fateMBeanServer = new FateMBeanServer(MBeanServerFactory.createMBeanServer("com.webank.ai.fate.jmx"), false);
+//            fateMBeanServer.registerMBean(new Sample(), new ObjectName(":name=sample,type=standard"));
+            fateMBeanServer.openJMXServer("fate", 9999);
+
+            // service:jmx:rmi:///jndi/rmi://10.56.224.80:9999/fate
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -70,8 +70,7 @@ public class FateMBeanServer {
         LOGGER.info("Server registerMBean {}", objectName);
     }
 
-    public String openJMXServer(String serverName) throws IOException {
-        int port = Integer.valueOf(System.getProperty("jmx.port", "9999"));
+    public String openJMXServer(String serverName, int port) throws IOException {
         LocateRegistry.createRegistry(port);
         String url = "service:jmx:rmi:///jndi/rmi://" + IpAddressUtil.getInnetIp() + ":" + port + "/" + serverName;
         JMXServiceURL jmxServiceURL = new JMXServiceURL(url);

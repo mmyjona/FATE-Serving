@@ -63,12 +63,15 @@ public class ServingServer implements InitializingBean {
 
     public ServingServer(String confPath) {
         this.confPath = new File(confPath).getAbsolutePath();
+
         System.setProperty("configpath", confPath);
         new Configuration(confPath).load();
     }
 
     public static void main(String[] args) {
         try {
+
+
             Options options = new Options();
             Option option = Option.builder("c")
                     .longOpt("config")
@@ -139,8 +142,11 @@ public class ServingServer implements InitializingBean {
             boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
             if (useJMX) {
                 String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");
+                int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
                 FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-                String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName);
+                String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
+                // service:jmx:rmi:///jndi/rmi://127.0.0.1:9999/serving
+                // /FATE-SERVICES/jmx/providers/service:jmx:rmi:///jndi/rmi://10.56.224.80:9999/serving
                 URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
                 zookeeperRegistry.register(jmxUrl);
             }
