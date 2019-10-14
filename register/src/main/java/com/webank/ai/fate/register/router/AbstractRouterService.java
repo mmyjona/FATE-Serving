@@ -90,8 +90,6 @@ public abstract class AbstractRouterService implements RouterService {
 
                 String targetVersion = url.getParameter(Constants.VERSION_KEY);
                 String routerModel = url.getParameter(Constants.ROUTER_MODEL);
-
-
                 try {
 
 

@@ -115,6 +115,7 @@ public class ServingServer implements InitializingBean {
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
         LOGGER.info("serving useRegister {}", useRegister);
+
         if (useRegister) {
 
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
@@ -139,13 +140,17 @@ public class ServingServer implements InitializingBean {
             });
             zookeeperRegistry.register(FateServer.serviceSets);
 
-            boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
-            if (useJMX) {
-                String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");
-                int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
-                FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-                String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-                URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
+
+        }
+        boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
+        if (useJMX) {
+            String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");
+            int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
+            FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
+            String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
+            URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
+            if(useRegister) {
+                ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
                 zookeeperRegistry.register(jmxUrl);
             }
         }
@@ -191,23 +196,11 @@ public class ServingServer implements InitializingBean {
     }
 
     private void initialize() {
-       // this.initializeClientPool();
         HttpClientPool.initPool();
         InferenceWorkerManager.prestartAllCoreThreads();
     }
 
-//    private void initializeClientPool() {
-//        ArrayList<String> serverAddress = new ArrayList<>();
-//        serverAddress.add(Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS));
-//        serverAddress.add(Configuration.getProperty(Dict.PROPERTY_ROLL_ADDRESS));
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                GrpcClientPool.initPool(serverAddress);
-//            }
-//        }).start();
-//        LOGGER.info("Finish init client pool");
-//    }
+
 
     @Override
     public void afterPropertiesSet() throws Exception {

@@ -71,10 +71,7 @@ public class Proxy {
         LOGGER.info("Server started listening on port: {}", serverConf.getPort());
         LOGGER.info("server conf: {}", serverConf);
         server.start();
-
         Properties properties = serverConf.getProperties();
-
-
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
 
         if (useRegister) {
@@ -82,28 +79,19 @@ public class Proxy {
             zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, "proxy", "online", serverConf.getPort());
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject("serving");
+        }
 
-            boolean useJMX = Boolean.valueOf(properties.getProperty("useJMX", "false"));
-            if (useJMX) {
-                String jmxServerName = properties.getProperty("jmx.server.name", "proxy");
-                int jmxPort = Integer.valueOf(System.getProperty("jmx.port", "9999"));
-                FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-                String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-                URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
+        boolean useJMX = Boolean.valueOf(properties.getProperty("useJMX", "false"));
+        if (useJMX) {
+            String jmxServerName = properties.getProperty("jmx.server.name", "proxy");
+            int jmxPort = Integer.valueOf(System.getProperty("jmx.port", "9999"));
+            FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
+            String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
+            URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
+            if(useRegister) {
                 zookeeperRegistry.register(jmxUrl);
             }
         }
-
-        //  List<URL> lists = zookeeperRegistry.lookup(URL.valueOf("proxy/online/unaryCall"));
-
-//        zookeeperRegistry.subscribe(URL.valueOf("proxy/online/unaryCall"),x->{
-//
-//            System.err.println("============"+x);
-//
-//        });
-
-
-        //     System.err.println("caches========"+zookeeperRegistry.getCacheUrls(URL.valueOf("proxy/online/unaryCall")));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.

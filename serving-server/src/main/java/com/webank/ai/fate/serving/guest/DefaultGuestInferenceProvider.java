@@ -216,6 +216,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         boolean getRemotePartyResult = (boolean) context.getDataOrDefault(Dict.GET_REMOTE_PARTY_RESULT, false);
         boolean billing = true;
         try {
+            int partyInferenceRetcode = 0;
             inferenceResult.setCaseid(context.getCaseId());
             ReturnResult federatedResult = context.getFederatedResult();
             if (!getRemotePartyResult) {
@@ -225,14 +226,14 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
                 if (federatedResult.getRetcode() == InferenceRetCode.GET_FEATURE_FAILED || federatedResult.getRetcode() == InferenceRetCode.INVALID_FEATURE || federatedResult.getRetcode() == InferenceRetCode.NO_FEATURE) {
                     billing = false;
                 }
+
+                if (federatedResult.getRetcode() != 0) {
+                    partyInferenceRetcode += 2;
+                    inferenceResult.setRetcode(federatedResult.getRetcode());
+                }
             }
-            int partyInferenceRetcode = 0;
             if (inferenceResult.getRetcode() != 0) {
                 partyInferenceRetcode += 1;
-            }
-            if (federatedResult.getRetcode() != 0) {
-                partyInferenceRetcode += 2;
-                inferenceResult.setRetcode(federatedResult.getRetcode());
             }
             inferenceResult.setRetcode(inferenceResult.getRetcode() + partyInferenceRetcode * 1000);
             inferenceResult = postProcessing.handleResult(context, inferenceResult);
