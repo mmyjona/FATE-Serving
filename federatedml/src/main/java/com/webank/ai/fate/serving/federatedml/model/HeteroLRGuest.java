@@ -37,7 +37,7 @@ public class HeteroLRGuest extends HeteroLR {
     }
 
     @Override
-    public Map<String, Object> handlePredict(Context context , List<Map<String, Object>> inputData, FederatedParams predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         Map<String, Object> result = new HashMap<>();
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get(Dict.SCORE);
@@ -45,7 +45,7 @@ public class HeteroLRGuest extends HeteroLR {
         LOGGER.info("guest score:{}", score);
 
         try {
-            ReturnResult hostPredictResponse = this.getFederatedPredict(context,predictParams,Dict.FEDERATED_INFERENCE,true);
+            ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
             //predictParams.put("federatedResult", hostPredictResponse);
             //context.setFederatedResult(hostPredictResponse);
             LOGGER.info("host response is {}", hostPredictResponse.getData());

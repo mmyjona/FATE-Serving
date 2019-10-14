@@ -18,6 +18,16 @@ package com.webank.ai.fate.serving.core.bean;
 
 public class ModelInfo {
     private String name;
+    private String namespace;
+
+    public ModelInfo() {
+
+    }
+
+    public ModelInfo(String name, String namespace) {
+        this.name = name;
+        this.namespace = namespace;
+    }
 
     public String getName() {
         return name;
@@ -32,17 +42,6 @@ public class ModelInfo {
     }
 
     public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    private String namespace;
-
-    public ModelInfo() {
-
-    }
-
-    public ModelInfo(String name, String namespace) {
-        this.name = name;
         this.namespace = namespace;
     }
 

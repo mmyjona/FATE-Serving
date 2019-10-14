@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.utils;
+package com.webank.ai.fate.jmx.util;
 
 
 import com.sun.management.OperatingSystemMXBean;

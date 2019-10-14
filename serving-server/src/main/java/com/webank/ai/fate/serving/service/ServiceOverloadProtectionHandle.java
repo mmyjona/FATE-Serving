@@ -28,10 +28,8 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata metadata, ServerCallHandler<ReqT, RespT> serverCallHandler) {
-        Metadata.Key<String> serviceNameKey = Metadata.Key.of(Dict.SERVICE_NAME, Metadata.ASCII_STRING_MARSHALLER);
-
-       // String serviceName = metadata.get(serviceNameKey);
-        String serviceName = "TestServiceName";
+        String fullMethodName = serverCall.getMethodDescriptor().getFullMethodName();
+        String serviceName = fullMethodName.split("/")[1];
         if (StringUtils.isBlank(serviceName)) {
             serverCall.close(Status.DATA_LOSS, metadata);
         }

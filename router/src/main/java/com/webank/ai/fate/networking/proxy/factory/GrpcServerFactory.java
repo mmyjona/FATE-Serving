@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.networking.proxy.factory;
 
-import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.webank.ai.fate.networking.proxy.grpc.service.DataTransferPipedServerImpl;
 import com.webank.ai.fate.networking.proxy.grpc.service.RouteServerImpl;
@@ -24,14 +23,10 @@ import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
 import com.webank.ai.fate.networking.proxy.service.FdnRouter;
 import com.webank.ai.fate.register.common.Constants;
-import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
-import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
@@ -55,7 +50,6 @@ import java.net.SocketAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -89,8 +83,8 @@ public class GrpcServerFactory {
             dataTransferPipedServer.setPipeFactory(pipeFactory);
         }
 
-       // NettyServerBuilder serverBuilder = null;
-        FateServerBuilder serverBuilder=null;
+        // NettyServerBuilder serverBuilder = null;
+        FateServerBuilder serverBuilder = null;
         if (StringUtils.isBlank(serverConf.getIp())) {
             LOGGER.info("server build on port only :{}", serverConf.getPort());
             // LOGGER.warn("this may cause trouble in multiple network devices. you may want to consider binding to a ip");
@@ -111,11 +105,10 @@ public class GrpcServerFactory {
         }
 
 
-
         serverBuilder.addService(dataTransferPipedServer)
 
                 .addService(routeServer)
-                .setZkRegisterLocation(serverConf.getData(Constants.ZOOKEEPER_REGISTER,null))
+                .setZkRegisterLocation(serverConf.getData(Constants.ZOOKEEPER_REGISTER, null))
                 .setApplication("proxy")
                 .maxConcurrentCallsPerConnection(20000)
                 .maxInboundMessageSize(32 << 20)
@@ -129,7 +122,6 @@ public class GrpcServerFactory {
                 .maxConnectionAge(24, TimeUnit.HOURS)
                 .maxConnectionAgeGrace(24, TimeUnit.HOURS)
                 .setProject("proxy").setEnvironment("online");
-
 
 
         if (serverConf.isSecureServer()) {
@@ -168,7 +160,7 @@ public class GrpcServerFactory {
             LOGGER.info("running in insecure mode");
         }
 
-        Server  server =serverBuilder.build();
+        Server server = serverBuilder.build();
 
         return server;
     }
@@ -176,7 +168,6 @@ public class GrpcServerFactory {
     private void stop() {
 
     }
-
 
 
     public Server createServer(String confPath) throws IOException {

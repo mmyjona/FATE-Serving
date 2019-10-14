@@ -16,19 +16,13 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-
-import com.webank.ai.fate.core.utils.ObjectTransform;
-
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @Description TODO
  * @Author kaideng
  **/
-public class HostFederatedParams extends FederatedParams{
+public class HostFederatedParams extends FederatedParams {
 
 //    Map<String, Object> requestData = new HashMap<>();
 //        Arrays.asList("caseid", "seqno").forEach((field -> {
@@ -41,9 +35,25 @@ public class HostFederatedParams extends FederatedParams{
 //        requestData.put("role", ObjectTransform.bean2Json(federatedParams.get("role")));
 
 
-//    private  String caseId;
+    //    private  String caseId;
 //    private  String seqNo;
-    protected  FederatedParty partnerLocal;
+    protected FederatedParty partnerLocal;
+    protected String methodName;
+    protected ModelInfo partnerModelInfo;
+
+    public HostFederatedParams() {
+
+    }
+    //   private  FederatedParty local;
+
+    public HostFederatedParams(String caseId, String seqNo, FederatedParty partnerLocal, FederatedParty local, FederatedRoles role, Map<String, Object> featureIdMap) {
+        this.caseId = caseId;
+        this.seqNo = seqNo;
+        this.partnerLocal = partnerLocal;
+        this.local = local;
+        this.role = role;
+        this.featureIdMap = featureIdMap;
+    }
 
     public String getMethodName() {
         return methodName;
@@ -52,9 +62,6 @@ public class HostFederatedParams extends FederatedParams{
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
-
-    protected  String  methodName;
- //   private  FederatedParty local;
 
     public ModelInfo getPartnerModelInfo() {
         return partnerModelInfo;
@@ -71,28 +78,6 @@ public class HostFederatedParams extends FederatedParams{
     public void setPartnerLocal(FederatedParty partnerLocal) {
         this.partnerLocal = partnerLocal;
     }
-
-    protected   ModelInfo partnerModelInfo;
-
-
-
-    public HostFederatedParams(){
-
-    }
-
-
-
-
-
-    public HostFederatedParams(String caseId, String seqNo, FederatedParty partnerLocal, FederatedParty local, FederatedRoles role, Map<String, Object> featureIdMap) {
-        this.caseId = caseId;
-        this.seqNo = seqNo;
-        this.partnerLocal = partnerLocal;
-        this.local = local;
-        this.role = role;
-        this.featureIdMap = featureIdMap;
-    }
-
 
 
 }

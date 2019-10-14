@@ -18,26 +18,24 @@ package com.webank.ai.fate.serving.core.bean;
 
 
 import com.webank.ai.fate.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.Context;
-import org.springframework.context.ApplicationContext;
-
 
 import java.util.Map;
 
 public interface CacheManager {
 
 
-    static    CacheManager  getInstance(){
+    static CacheManager getInstance() {
         return (CacheManager) ApplicationHolder.applicationContext.getBean(CacheManager.class);
-    };
+    }
+
+    ;
 
 
+    public void store(Context context, String key, Object object);
 
-    public  void store(Context  context,String  key,  Object  object);
+    public <T> T restore(Context context, String key, Class<T> dataType);
 
-    public  <T> T restore(Context  context,String  key, Class<T>  dataType);
-
-    public  void putInferenceResultCache(Context context , String partyId, String caseid, ReturnResult returnResult) ;
+    public void putInferenceResultCache(Context context, String partyId, String caseid, ReturnResult returnResult);
 //    {
 //
 //        long  beginTime =System.currentTimeMillis();
@@ -55,7 +53,7 @@ public interface CacheManager {
 //        }
 //    }
 
-    public  ReturnResult getInferenceResultCache(String partyId, String caseid) ;
+    public ReturnResult getInferenceResultCache(String partyId, String caseid);
 //    {
 //        String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
 //        ReturnResult returnResult = getFromCache(inferenceResultCacheKey, CacheType.INFERENCE_RESULT);
@@ -65,7 +63,7 @@ public interface CacheManager {
 //        return returnResult;
 //    }
 
-    public  void putRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds, ReturnResult returnResult);
+    public void putRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds, ReturnResult returnResult);
 //    {
 //        if (! Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))){
 //            return;
@@ -77,7 +75,7 @@ public interface CacheManager {
 //        }
 //    }
 
-    public  ReturnResult getRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds);
+    public ReturnResult getRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds);
 //    {
 //        if (! Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))){
 //            return null;

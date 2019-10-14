@@ -23,7 +23,7 @@ import com.webank.ai.fate.serving.interfaces.Cache;
  * @Description TODO
  * @Author kaideng
  **/
-public class RedisCache implements Cache{
+public class RedisCache implements Cache {
     @Override
     public void put(Context context, String key, Object object) {
 

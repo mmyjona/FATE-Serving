@@ -27,17 +27,17 @@ import com.webank.ai.fate.register.zookeeper.ZookeeperRegistryFactory;
 public class Test {
 
 
-    public  static  void main(String[]  args){
+    public static void main(String[] args) {
 
         URL registryUrl = URL.valueOf("zookeeper://localhost:" + 2181);
 
-         URL serviceUrl = URL.valueOf("zookeeper://zookeeper/" + "mytest" + "?notify=false&methods=test1,test2");
+        URL serviceUrl = URL.valueOf("zookeeper://zookeeper/" + "mytest" + "?notify=false&methods=test1,test2");
 
         ZookeeperRegistryFactory zookeeperRegistryFactory = new ZookeeperRegistryFactory();
-       zookeeperRegistryFactory.setZookeeperTransporter(new CuratorZookeeperTransporter());
-       ZookeeperRegistry zookeeperRegistry = (ZookeeperRegistry) zookeeperRegistryFactory.createRegistry(registryUrl);
+        zookeeperRegistryFactory.setZookeeperTransporter(new CuratorZookeeperTransporter());
+        ZookeeperRegistry zookeeperRegistry = (ZookeeperRegistry) zookeeperRegistryFactory.createRegistry(registryUrl);
 
-       //  zookeeperRegistry.register(serviceUrl);
+        //  zookeeperRegistry.register(serviceUrl);
 
     }
 }

@@ -29,7 +29,6 @@
         </Console>
 
 
-
         <RollingFile name="inference"
                      fileName="${logdir}/${project}-${module}-inference.log"
                      filePattern="${logdir}/%d{yyyy-MM-dd}/${project}-${module}-inference.log.%d{yyyy-MM-dd}">
@@ -40,7 +39,6 @@
             </Policies>
             <DefaultRolloverStrategy max="24"/>
         </RollingFile>
-
 
 
         <RollingFile name="inferenceAudit"
@@ -55,18 +53,15 @@
         </RollingFile>
 
 
-
-
-
         <!--<RollingFile name="audit"-->
-                     <!--fileName="${logdir}/${project}-${module}-audit.log"-->
-                     <!--filePattern="${logdir}/%d{yyyy-MM-dd}/${project}-${module}-audit.log.%d{yyyy-MM-dd}">-->
-            <!--<PatternLayout charset="UTF-8"-->
-                           <!--pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %c{1.}(%F:%L) - %m%n"/>-->
-            <!--<Policies>-->
-                <!--<TimeBasedTriggeringPolicy/>-->
-            <!--</Policies>-->
-            <!--<DefaultRolloverStrategy max="24"/>-->
+        <!--fileName="${logdir}/${project}-${module}-audit.log"-->
+        <!--filePattern="${logdir}/%d{yyyy-MM-dd}/${project}-${module}-audit.log.%d{yyyy-MM-dd}">-->
+        <!--<PatternLayout charset="UTF-8"-->
+        <!--pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %c{1.}(%F:%L) - %m%n"/>-->
+        <!--<Policies>-->
+        <!--<TimeBasedTriggeringPolicy/>-->
+        <!--</Policies>-->
+        <!--<DefaultRolloverStrategy max="24"/>-->
         <!--</RollingFile>-->
 
         <RollingFile name="stat"
@@ -125,7 +120,6 @@
         </RollingFile>
 
 
-
     </Appenders>
 
     <Loggers>
@@ -152,6 +146,7 @@
 
 
         <AsyncRoot level="debug" includeLocation="true">
+            <!--<AppenderRef ref="Console" level="debug"/>-->
             <AppenderRef ref="info" level="debug"/>
             <AppenderRef ref="ErrorLog" level="error"/>
         </AsyncRoot>

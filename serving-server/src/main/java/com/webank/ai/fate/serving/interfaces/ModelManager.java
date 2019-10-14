@@ -28,7 +28,7 @@ import java.util.Map;
 
 public interface ModelManager {
 
-    public ReturnResult publishLoadModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) ;
+    public ReturnResult publishLoadModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
 
     public ReturnResult publishOnlineModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
 
@@ -36,13 +36,11 @@ public interface ModelManager {
 
     public ModelNamespaceData getModelNamespaceData(String namespace);
 
-    public  String getModelNamespaceByPartyId(String partyId);
+    public String getModelNamespaceByPartyId(String partyId);
 
     public ModelInfo getModelInfoByPartner(String partnerModelName, String partnerModelNamespace);
 
-    public  PipelineTask pushModelIntoPool(String name, String namespace);
-
-
+    public PipelineTask pushModelIntoPool(String name, String namespace);
 
 
 }

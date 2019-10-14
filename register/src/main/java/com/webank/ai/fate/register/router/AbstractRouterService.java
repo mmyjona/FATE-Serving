@@ -31,18 +31,16 @@ import com.webank.ai.fate.register.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 import java.util.List;
 
 
-public abstract  class AbstractRouterService  implements RouterService {
+public abstract class AbstractRouterService implements RouterService {
 
 
-    Logger logger = LogManager.getLogger();
-
-    protected LoadBalancerFactory   loadBalancerFactory=new DefaultLoadBalancerFactory();
-
+    protected LoadBalancerFactory loadBalancerFactory = new DefaultLoadBalancerFactory();
     protected AbstractRegistry registry;
+    protected LoadBalancer loadBalancer;
+    Logger logger = LogManager.getLogger();
 
     public Registry getRegistry() {
         return registry;
@@ -60,37 +58,45 @@ public abstract  class AbstractRouterService  implements RouterService {
         this.loadBalancer = loadBalancer;
     }
 
-    protected LoadBalancer loadBalancer;
-
-
     @Override
-    public List<URL> router(URL  url, LoadBalanceModel  loadBalanceModel){
+    public List<URL> router(URL url, LoadBalanceModel loadBalanceModel) {
 
         this.loadBalancer = loadBalancerFactory.getLoaderBalancer(loadBalanceModel);
 
-        return doRouter(url,loadBalanceModel);
+        return doRouter(url, loadBalanceModel);
     }
 
-    public  abstract List<URL>  doRouter(URL url,LoadBalanceModel  loadBalanceModel);
+    public abstract List<URL> doRouter(URL url, LoadBalanceModel loadBalanceModel);
 
 
     @Override
     public List<URL> router(URL url) {
-        return  this.router(url,LoadBalanceModel.random);
+        return this.router(url, LoadBalanceModel.random);
     }
 
-    protected  List<URL>  filterVersion(List<URL>  urls,String  version){
+    protected List<URL> filterVersion(List<URL> urls, String version) {
 
-        final List<URL>   resultUrls = Lists.newArrayList();
+        if(StringUtils.isEmpty(version)){
 
-        if(CollectionUtils.isNotEmpty(urls)){
+            return urls;
 
-            urls.forEach(url-> {
+        }
+
+        final List<URL> resultUrls = Lists.newArrayList();
+
+        if (CollectionUtils.isNotEmpty(urls)) {
+
+            urls.forEach(url -> {
 
                 String targetVersion = url.getParameter(Constants.VERSION_KEY);
                 String routerModel = url.getParameter(Constants.ROUTER_MODEL);
-
                 try {
+
+
+                    if(RouterModel.ALL_ALLOWED.name().equals(routerModel)){
+                        resultUrls.add(url);
+                        return;
+                    }
                     Double targetVersionValue = Double.parseDouble(targetVersion);
                     Double versionValue = Double.parseDouble(version);
 
@@ -117,10 +123,11 @@ public abstract  class AbstractRouterService  implements RouterService {
                     }
                 } catch (Exception e) {
                     throw new IllegalArgumentException("parse version error");
+
                 }
             });
         }
-        return  resultUrls;
+        return resultUrls;
     }
 
 }

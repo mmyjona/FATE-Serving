@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.utils;
 
 
 import com.webank.ai.fate.core.storage.dtable.DTableInfo;
-
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedRoles;
 import com.webank.ai.fate.serving.core.manager.SceneUtils;

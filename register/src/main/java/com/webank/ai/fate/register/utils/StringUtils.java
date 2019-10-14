@@ -61,7 +61,7 @@ public final class StringUtils {
     /**
      * <p>Repeat a String {@code repeat} times to form a
      * new String.</p>
-     *
+     * <p>
      * <pre>
      * StringUtils.repeat(null, 2) = null
      * StringUtils.repeat("", 0)   = ""
@@ -118,7 +118,7 @@ public final class StringUtils {
     /**
      * <p>Repeat a String {@code repeat} times to form a
      * new String, with a String separator injected each time. </p>
-     *
+     * <p>
      * <pre>
      * StringUtils.repeat(null, null, 2) = null
      * StringUtils.repeat(null, "x", 2)  = null
@@ -147,11 +147,11 @@ public final class StringUtils {
     /**
      * <p>Removes a substring only if it is at the end of a source string,
      * otherwise returns the source string.</p>
-     *
+     * <p>
      * <p>A {@code null} source string will return {@code null}.
      * An empty ("") source string will return the empty string.
      * A {@code null} search string will return the source string.</p>
-     *
+     * <p>
      * <pre>
      * StringUtils.removeEnd(null, *)      = null
      * StringUtils.removeEnd("", *)        = ""
@@ -180,13 +180,13 @@ public final class StringUtils {
     /**
      * <p>Returns padding using the specified delimiter repeated
      * to a given length.</p>
-     *
+     * <p>
      * <pre>
      * StringUtils.repeat('e', 0)  = ""
      * StringUtils.repeat('e', 3)  = "eee"
      * StringUtils.repeat('e', -2) = ""
      * </pre>
-     *
+     * <p>
      * <p>Note: this method doesn't not support padding with
      * <a href="http://www.unicode.org/glossary/#supplementary_character">Unicode Supplementary Characters</a>
      * as they require a pair of {@code char}s to be represented.
@@ -209,13 +209,13 @@ public final class StringUtils {
 
     /**
      * <p>Strips any of a set of characters from the end of a String.</p>
-     *
+     * <p>
      * <p>A {@code null} input String returns {@code null}.
      * An empty string ("") input returns the empty string.</p>
-     *
+     * <p>
      * <p>If the stripChars String is {@code null}, whitespace is
      * stripped as defined by {@link Character#isWhitespace(char)}.</p>
-     *
+     * <p>
      * <pre>
      * StringUtils.stripEnd(null, *)          = null
      * StringUtils.stripEnd("", *)            = ""
@@ -254,9 +254,9 @@ public final class StringUtils {
 
     /**
      * <p>Replaces all occurrences of a String within another String.</p>
-     *
+     * <p>
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * <p>
      * <pre>
      * StringUtils.replace(null, *, *)        = null
      * StringUtils.replace("", *, *)          = ""
@@ -282,9 +282,9 @@ public final class StringUtils {
     /**
      * <p>Replaces a String with another String inside a larger String,
      * for the first {@code max} values of the search String.</p>
-     *
+     * <p>
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * <p>
      * <pre>
      * StringUtils.replace(null, *, *, *)         = null
      * StringUtils.replace("", *, *, *)           = ""
@@ -349,7 +349,7 @@ public final class StringUtils {
 
     /**
      * <p>Checks if the strings contain empty or null elements. <p/>
-     *
+     * <p>
      * <pre>
      * StringUtils.isNoneEmpty(null)            = false
      * StringUtils.isNoneEmpty("")              = false
@@ -378,7 +378,7 @@ public final class StringUtils {
 
     /**
      * <p>Checks if the strings contain at least on empty or null element. <p/>
-     *
+     * <p>
      * <pre>
      * StringUtils.isAnyEmpty(null)            = true
      * StringUtils.isAnyEmpty("")              = true
@@ -794,12 +794,11 @@ public final class StringUtils {
     }
 
 
-
     public static boolean isAllUpperCase(String str) {
         if (str != null && !isEmpty(str)) {
             int sz = str.length();
 
-            for(int i = 0; i < sz; ++i) {
+            for (int i = 0; i < sz; ++i) {
                 if (!Character.isUpperCase(str.charAt(i))) {
                     return false;
                 }

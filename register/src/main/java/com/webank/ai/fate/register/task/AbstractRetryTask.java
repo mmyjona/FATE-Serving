@@ -17,9 +17,9 @@
 package com.webank.ai.fate.register.task;
 
 
+import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.FailbackRegistry;
 import com.webank.ai.fate.register.common.TimerTask;
-import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.interfaces.Timeout;
 import com.webank.ai.fate.register.interfaces.Timer;
 import com.webank.ai.fate.register.url.URL;
@@ -33,37 +33,28 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRetryTask implements TimerTask {
 
     public static final Logger logger = LogManager.getLogger();
-
-    int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
-
-
-    String REGISTRY_RETRY_TIMES_KEY = "retry.times";
-
     /**
      * url for retry task
      */
     protected final URL url;
-
     /**
      * registry for this task
      */
     protected final FailbackRegistry registry;
-
     /**
      * retry period
      */
     final long retryPeriod;
-
     /**
      * define the most retry times
      */
     private final int retryTimes;
-
     /**
      * task name for this task
      */
     private final String taskName;
-
+    int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
+    String REGISTRY_RETRY_TIMES_KEY = "retry.times";
     /**
      * times of retry.
      * retry task is execute in single thread so that the times is not need volatile.
@@ -109,7 +100,7 @@ public abstract class AbstractRetryTask implements TimerTask {
     public void run(Timeout timeout) throws Exception {
 
         logger.info("retry task begin");
-        long  begin =  System.currentTimeMillis();
+        long begin = System.currentTimeMillis();
         if (timeout.isCancelled() || timeout.timer().isStop() || isCancel()) {
             // other thread cancel this timeout or stop the timer.
             return;
@@ -128,9 +119,9 @@ public abstract class AbstractRetryTask implements TimerTask {
             logger.error("Failed to execute task " + taskName + ", url: " + url + ", waiting for again, cause:" + t.getMessage(), t);
             // reput this task when catch exception.
             reput(timeout, retryPeriod);
-        }finally{
-            long  end =  System.currentTimeMillis();
-            logger.error("retry task cost "+(end-begin));
+        } finally {
+            long end = System.currentTimeMillis();
+            logger.error("retry task cost " + (end - begin));
         }
 
 

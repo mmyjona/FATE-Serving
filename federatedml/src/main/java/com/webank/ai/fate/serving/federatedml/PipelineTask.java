@@ -23,30 +23,20 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
-import com.webank.ai.fate.serving.federatedml.DSLParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PipelineTask {
+    private static final Logger LOGGER = LogManager.getLogger();
     private List<BaseModel> pipeLineNode = new ArrayList<>();
-    private Map<String,BaseModel>   modelMap = new HashMap<String,BaseModel>();
-
-
-
+    private Map<String, BaseModel> modelMap = new HashMap<String, BaseModel>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
-    private static final Logger LOGGER = LogManager.getLogger();
 
-    public  BaseModel  getModelByComponentName(String name){
-        return  this.modelMap.get(name);
+    public BaseModel getModelByComponentName(String name) {
+        return this.modelMap.get(name);
     }
 
     public int initModel(Map<String, byte[]> modelProtoMap) {
@@ -71,7 +61,7 @@ public class PipelineTask {
                     byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
                     byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
                     mlNode.initModel(protoMeta, protoParam);
-                    modelMap.put(componentName,mlNode);
+                    modelMap.put(componentName, mlNode);
                     pipeLineNode.add(mlNode);
                     LOGGER.info(" Add class {} to pipeline task list", className);
                 } catch (Exception ex) {
@@ -89,10 +79,7 @@ public class PipelineTask {
     }
 
 
-
-
-
-    public Map<String, Object> predict(Context context , Map<String, Object> inputData, FederatedParams predictParams) {
+    public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
         LOGGER.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
         List<Map<String, Object>> outputData = new ArrayList<>();
         for (int i = 0; i < this.pipeLineNode.size(); i++) {
@@ -117,14 +104,14 @@ public class PipelineTask {
                 inputs.add(inputData);
             }
             if (this.pipeLineNode.get(i) != null) {
-                outputData.add(this.pipeLineNode.get(i).handlePredict(context,inputs, predictParams));
+                outputData.add(this.pipeLineNode.get(i).handlePredict(context, inputs, predictParams));
             } else {
                 outputData.add(inputs.get(0));
             }
 
         }
         ReturnResult federatedResult = context.getFederatedResult();
-        if(federatedResult!=null) {
+        if (federatedResult != null) {
             inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
         }
 
@@ -134,9 +121,9 @@ public class PipelineTask {
 
     private HashMap<String, byte[]> changeModelProto(Map<String, byte[]> modelProtoMap) {
         HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>();
-        for (Map.Entry<String, byte[]> entry: modelProtoMap.entrySet()) {
+        for (Map.Entry<String, byte[]> entry : modelProtoMap.entrySet()) {
             String key = entry.getKey();
-            if (!key.equals("pipeline.pipeline:Pipeline")) {
+            if (!"pipeline.pipeline:Pipeline".equals(key)) {
                 String[] componentNameSegments = key.split("\\.", -1);
                 if (componentNameSegments.length != 2) {
                     newModelProtoMap.put(entry.getKey(), entry.getValue());

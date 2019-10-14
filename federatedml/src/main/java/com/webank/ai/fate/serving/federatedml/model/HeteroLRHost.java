@@ -31,16 +31,16 @@ public class HeteroLRHost extends HeteroLR {
 
     @Override
 
-    public Map<String, Object> handlePredict(Context context,List<Map<String, Object> > inputData, FederatedParams predictParams) {
+    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
 
-            LOGGER.info("hetero lr host begin to predict");
-            HashMap<String, Object> result = new HashMap<>();
-            Map<String, Double> ret = forward(inputData);
-            result.put(Dict.SCORE, ret.get(Dict.SCORE));
+        LOGGER.info("hetero lr host begin to predict");
+        HashMap<String, Object> result = new HashMap<>();
+        Map<String, Double> ret = forward(inputData);
+        result.put(Dict.SCORE, ret.get(Dict.SCORE));
 
-            LOGGER.info("hetero lr host predict ends, result is {}", result);
+        LOGGER.info("hetero lr host predict ends, result is {}", result);
 
-            return result;
-        }
+        return result;
     }
+}

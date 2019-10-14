@@ -21,43 +21,43 @@ import java.util.regex.Pattern;
 
 public interface Constants {
 
-    public  static String ZOOKEEPER_REGISTER="zookeeper_register";
+    public static String ZOOKEEPER_REGISTER = "zookeeper_register";
 
-    public  static String PARTY_ID="party_id";
+    public static String PARTY_ID = "party_id";
 
-    public  static String ROUTER_MODEL="ROUTER_MODEL";
+    public static String ROUTER_MODEL = "ROUTER_MODEL";
 
-    public  static String VERSION =  "version";
+    public static String VERSION = "version";
 
-    public  static String  RETRY_PERID_KEY="retry_period_key";
+    public static String RETRY_PERID_KEY = "retry_period_key";
 
-    public  static String  REGISTRY_FILESAVE_SYNC_KEY ="registry_filesave_sync_key";
+    public static String REGISTRY_FILESAVE_SYNC_KEY = "registry_filesave_sync_key";
 
-    public  static  String  FILE_KEY = "file";
+    public static String FILE_KEY = "file";
 
-    public  static String APPLICATION_KEY="application";
+    public static String APPLICATION_KEY = "application";
 
-    public  static String  BACKUP_KEY ="backup";
+    public static String BACKUP_KEY = "backup";
 
-    public  static String  PROTOCOL_KEY="protocol";
-
-
-    public  static String  PROJECT_KEY="project";
-
-    public  static String  ENVIRONMENT_KEY="environment";
-
-    public  static String  SERVER_PORT="server_port";
+    public static String PROTOCOL_KEY = "protocol";
 
 
-    public  static String  HOST_KEY = "host";
+    public static String PROJECT_KEY = "project";
 
-    public  static String  PORT_KEY = "port";
+    public static String ENVIRONMENT_KEY = "environment";
 
-    public  static String  PATH_KEY="path";
+    public static String SERVER_PORT = "server_port";
 
-    public  static String  PATH_JMX = "jmx";
 
-    public  static String  JMX_PROTOCOL_KEY = "service:jmx:rmi:///jndi/rmi";
+    public static String HOST_KEY = "host";
+
+    public static String PORT_KEY = "port";
+
+    public static String PATH_KEY = "path";
+
+    public static String PATH_JMX = "jmx";
+
+    public static String JMX_PROTOCOL_KEY = "service:jmx:rmi:///jndi/rmi";
 
     String PROVIDER = "com/webank/ai/fate/register/provider";
 
@@ -67,7 +67,6 @@ public interface Constants {
     String CHECK_KEY = "check";
 
 
-
     String REMOTE_APPLICATION_KEY = "remote.application";
 
     String ENABLED_KEY = "enabled";
@@ -75,10 +74,7 @@ public interface Constants {
     String DISABLED_KEY = "disabled";
 
 
-
-
-
-    String ENVIRONMENT ="environment";
+    String ENVIRONMENT = "environment";
 
     String ANY_VALUE = "*";
 
@@ -103,7 +99,6 @@ public interface Constants {
     Pattern EQUAL_SPLIT_PATTERN = Pattern.compile("\\s*[=]+\\s*");
 
     String DEFAULT_PROXY = "javassist";
-
 
 
     int DEFAULT_CORE_THREADS = 0;
@@ -186,7 +181,6 @@ public interface Constants {
     String INTERFACE_KEY = "interface";
 
 
-
     String DUMP_DIRECTORY = "dump.directory";
 
     String CLASSIFIER_KEY = "classifier";
@@ -204,11 +198,6 @@ public interface Constants {
 
     String MONITOR_KEY = "monitor";
     String CLUSTER_KEY = "cluster";
-
-
-
-
-
 
 
     String REGISTRY_KEY = "registry";

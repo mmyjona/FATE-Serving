@@ -21,7 +21,7 @@ import org.springframework.context.ApplicationContext;
 
 public class ApplicationHolder {
 
-    public  static ApplicationContext  applicationContext;
+    public static ApplicationContext applicationContext;
 
 
 }

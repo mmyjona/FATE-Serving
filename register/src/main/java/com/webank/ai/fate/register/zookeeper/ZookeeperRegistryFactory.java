@@ -23,7 +23,6 @@ import com.webank.ai.fate.register.url.URL;
 
 /**
  * ZookeeperRegistryFactory.
- *
  */
 public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
 

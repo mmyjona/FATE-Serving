@@ -25,27 +25,21 @@ import java.util.Properties;
 
 @Component
 public class ServerConf {
+    Properties properties;
     private String ip;
     private int port;
-
     private String routeTablePath;
-
     private boolean isSecureServer;
     private String serverCrtPath;
     private String serverKeyPath;
-
     private boolean isSecureClient;
     private String caCrtPath;
-
     private Pipe pipe;
     private PipeFactory pipeFactory;
-
     private String coordinator;
     private String logPropertiesPath;
-
     private boolean isAuditEnabled;
     private boolean isNeighbourInsecureChannelEnabled;
-
     private boolean isDebugEnabled;
 
     public Properties getProperties() {
@@ -56,14 +50,12 @@ public class ServerConf {
         this.properties = properties;
     }
 
-    Properties properties;
+    public String getData(String key, String defaultValue) {
 
-    public  String   getData(String  key ,String  defaultValue){
-
-        if(properties!=null) {
-            return  properties.getProperty(key, defaultValue);
+        if (properties != null) {
+            return properties.getProperty(key, defaultValue);
         }
-        return  null;
+        return null;
     }
 
     @Override

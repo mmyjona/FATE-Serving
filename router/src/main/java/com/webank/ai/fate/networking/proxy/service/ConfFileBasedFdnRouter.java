@@ -25,7 +25,6 @@ import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,10 +61,6 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
     private String routeTableFilename;
     private SecureRandom random;
 
-    public  Map<String, Map<String, List<BasicMeta.Endpoint>>> getRouteTable(){
-        return   routeTable;
-    }
-
     public ConfFileBasedFdnRouter() {
         routeTable = new ConcurrentHashMap<>();
         topicEndpointMapping = new WeakHashMap<>();
@@ -84,6 +79,10 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
     public ConfFileBasedFdnRouter(String filename) {
         this();
         setRouteTable(filename);
+    }
+
+    public Map<String, Map<String, List<BasicMeta.Endpoint>>> getRouteTable() {
+        return routeTable;
     }
 
     @Override
@@ -154,16 +153,12 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
 //        }
 
 
-
         BasicMeta.Endpoint result = topicEndpointMapping.getOrDefault(topic, null);
 
         // 1st priority: routed and fully match
         if (result != null) {
             return result;
         }
-
-
-
 
 
         // todo: add callback check
@@ -206,10 +201,6 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
                         */
                 return null;
             }
-
-
-
-
 
 
             List<BasicMeta.Endpoint> endpoints =

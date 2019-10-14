@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.core.bean;
 
 
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Map;
@@ -37,23 +36,23 @@ public class FederatedParams {
 //        federatedParams.put("role", modelNamespaceData.getRole());
 //        federatedParams.put("feature_id", featureIds);
 
-    String  caseId;
+    String caseId;
 
-    String  seqNo;
+    String seqNo;
 
     FederatedParty local;
-
-    public void setModelInfo(ModelInfo modelInfo) {
-        this.modelInfo = modelInfo;
-    }
+    ModelInfo modelInfo;
+    FederatedRoles role;
+    Map<String, Object> featureIdMap;
+    Map<String, Object> data = Maps.newHashMap();
 
     public ModelInfo getModelInfo() {
         return modelInfo;
     }
 
-    ModelInfo  modelInfo;
-
-    FederatedRoles role;
+    public void setModelInfo(ModelInfo modelInfo) {
+        this.modelInfo = modelInfo;
+    }
 
     public String getCaseId() {
         return caseId;
@@ -79,8 +78,6 @@ public class FederatedParams {
         this.local = local;
     }
 
-
-
     public FederatedRoles getRole() {
         return role;
     }
@@ -97,8 +94,6 @@ public class FederatedParams {
         this.featureIdMap = featureIdMap;
     }
 
-    Map<String, Object>  featureIdMap;
-
     public Map<String, Object> getData() {
         return data;
     }
@@ -107,13 +102,10 @@ public class FederatedParams {
         this.data = data;
     }
 
-    Map<String,Object>  data = Maps.newHashMap();
-
-
     @Override
-    public  String toString(){
+    public String toString() {
 
-        return  ToStringBuilder.reflectionToString(this);
+        return ToStringBuilder.reflectionToString(this);
     }
 
 

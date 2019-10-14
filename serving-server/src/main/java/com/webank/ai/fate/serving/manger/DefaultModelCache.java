@@ -27,17 +27,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class DefaultModelCache  implements ModelCache {
+public class DefaultModelCache implements ModelCache {
     private static final Logger LOGGER = LogManager.getLogger();
-    private  LoadingCache<String, PipelineTask> modelCache;
+    private LoadingCache<String, PipelineTask> modelCache;
 
-    public   DefaultModelCache(){
+    public DefaultModelCache() {
         modelCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_ACCESS_TTL), TimeUnit.HOURS)
                 .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_MAX_SIZE))
@@ -50,13 +49,13 @@ public class DefaultModelCache  implements ModelCache {
     }
 
     @Override
-    public  PipelineTask loadModel(String modelKey) {
+    public PipelineTask loadModel(String modelKey) {
         String[] modelKeyFields = ModelUtils.splitModelKey(modelKey);
         return ModelUtils.loadModel(modelKeyFields[0], modelKeyFields[1]);
     }
 
     @Override
-    public  PipelineTask get(String modelKey) {
+    public PipelineTask get(String modelKey) {
         try {
             return modelCache.get(modelKey);
         } catch (ExecutionException ex) {
@@ -66,19 +65,19 @@ public class DefaultModelCache  implements ModelCache {
     }
 
     @Override
-    public  void put(String modelKey, PipelineTask model) {
+    public void put(String modelKey, PipelineTask model) {
         modelCache.put(modelKey, model);
     }
 
     @Override
-    public  long getSize() {
+    public long getSize() {
         return modelCache.size();
     }
 
     @Override
     public Set<String> getKeys() {
 
-        return  modelCache.asMap().keySet();
+        return modelCache.asMap().keySet();
 
     }
 }

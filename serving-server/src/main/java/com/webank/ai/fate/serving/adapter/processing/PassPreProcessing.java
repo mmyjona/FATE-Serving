@@ -28,7 +28,7 @@ import java.util.Optional;
 
 public class PassPreProcessing implements PreProcessing {
     @Override
-    public PreProcessingResult getResult(Context context , String paras) {
+    public PreProcessingResult getResult(Context context, String paras) {
         PreProcessingResult preProcessingResult = new PreProcessingResult();
         preProcessingResult.setProcessingResult((Map<String, Object>) ObjectTransform.json2Bean(paras, HashMap.class));
         Map<String, Object> featureIds = new HashMap<>();

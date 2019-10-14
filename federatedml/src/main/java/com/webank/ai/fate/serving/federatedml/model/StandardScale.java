@@ -29,7 +29,7 @@ public class StandardScale {
         LOGGER.info("Start StandardScale transform");
         for (String key : inputData.keySet()) {
             try {
-                if (standardScalesMap.containsKey(key)){
+                if (standardScalesMap.containsKey(key)) {
                     ColumnScaleParam standardScale = standardScalesMap.get(key);
 
                     double value = Double.parseDouble(inputData.get(key).toString());
@@ -46,8 +46,7 @@ public class StandardScale {
 
                     value = (value - standardScale.getMean()) / std;
                     inputData.put(key, value);
-                }
-                else{
+                } else {
                     LOGGER.warn("feature {} is not in scale, maybe missing or do not need to be scaled");
                 }
 

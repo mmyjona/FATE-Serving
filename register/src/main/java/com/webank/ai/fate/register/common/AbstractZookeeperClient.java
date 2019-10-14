@@ -17,7 +17,6 @@
 package com.webank.ai.fate.register.common;
 
 
-
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +30,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 
 public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildListener> implements ZookeeperClient {
-
 
 
     private static final Logger logger = LogManager.getLogger(AbstractZookeeperClient.class);
@@ -123,11 +121,11 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
     }
 
     @Override
-    public void removeDataListener(String path, DataListener listener ){
+    public void removeDataListener(String path, DataListener listener) {
         ConcurrentMap<DataListener, TargetDataListener> dataListenerMap = listeners.get(path);
         if (dataListenerMap != null) {
             TargetDataListener targetListener = dataListenerMap.remove(listener);
-            if(targetListener != null){
+            if (targetListener != null) {
                 removeTargetDataListener(path, targetListener);
             }
         }

@@ -27,13 +27,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RegisterService {
 
-    String serviceName() ;
+    String serviceName();
 
-    String  version() default "";
+    String version() default "";
 
-    boolean  useDynamicEnvironment()  default   false;
+    boolean useDynamicEnvironment() default false;
 
-    RouterModel routerModel() default   RouterModel.ALL_ALLOWED;
+    RouterModel routerModel() default RouterModel.ALL_ALLOWED;
 
 
 //    String threadPoolKey() default "";

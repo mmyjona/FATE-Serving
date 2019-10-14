@@ -17,7 +17,7 @@
 package com.webank.ai.fate.jmx.client;
 
 import com.webank.ai.fate.jmx.mbean.SampleMBean;
-import com.webank.ai.fate.jmx.util.IpAddressUtil;
+import com.webank.ai.fate.jmx.util.GetSystemInfo;
 
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class FateJmxClient {
     public static void main(String[] args) throws IOException, MalformedObjectNameException {
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + IpAddressUtil.getInnetIp() + ":9999/fate");
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + GetSystemInfo.getLocalIp() + ":9999/fate");
         JMXConnector connector = JMXConnectorFactory.connect(url, null);
 
         MBeanServerConnection mbsc = connector.getMBeanServerConnection();

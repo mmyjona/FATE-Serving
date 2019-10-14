@@ -33,16 +33,11 @@ public enum EventType {
     INITIALIZED(10);
 
 
-
     private final int intValue;     // Integer representation of value
     // for sending over wire
 
     EventType(int intValue) {
         this.intValue = intValue;
-    }
-
-    public int getIntValue() {
-        return intValue;
     }
 
     public static Watcher.Event.EventType fromInt(int intValue) {
@@ -61,5 +56,9 @@ public enum EventType {
             default:
                 throw new RuntimeException("Invalid integer value for conversion to EventType");
         }
+    }
+
+    public int getIntValue() {
+        return intValue;
     }
 }

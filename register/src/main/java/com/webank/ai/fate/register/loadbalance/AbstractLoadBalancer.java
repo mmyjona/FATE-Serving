@@ -26,7 +26,8 @@ import static com.webank.ai.fate.register.common.Constants.WEIGHT_KEY;
 
 public abstract class AbstractLoadBalancer implements LoadBalancer {
 
-    public  static  int  DEFAULT_WEIGHT =100;
+    public static int DEFAULT_WEIGHT = 100;
+
     @Override
     public List<URL> select(List<URL> urls) {
         if (CollectionUtils.isEmpty(urls)) {
@@ -37,13 +38,14 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
         }
 
 
-
         return doSelect(urls);
     }
+
     protected abstract List<URL> doSelect(List<URL> url);
+
     protected int getWeight(URL url) {
-        int weight = url.getParameter( WEIGHT_KEY, DEFAULT_WEIGHT);
-        return  weight;
+        int weight = url.getParameter(WEIGHT_KEY, DEFAULT_WEIGHT);
+        return weight;
     }
 
 }

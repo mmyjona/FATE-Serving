@@ -34,7 +34,6 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.KeeperException.NodeExistsException;
 import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -43,15 +42,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
-import static com.webank.ai.fate.register.common.Constants.*;
+import static com.webank.ai.fate.register.common.Constants.TIMEOUT_KEY;
+import static com.webank.ai.fate.register.common.Constants.UTF_8;
 
 
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.CuratorWatcherImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
 
 
-    private static final Logger logger = LogManager.getLogger(CuratorZookeeperClient.class);
-
     static final Charset CHARSET = Charset.forName(UTF_8);
+    private static final Logger logger = LogManager.getLogger(CuratorZookeeperClient.class);
     private final CuratorFramework client;
     private Map<String, TreeCache> treeCacheMap = new ConcurrentHashMap<>();
 
@@ -70,11 +69,13 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                 @Override
                 public void stateChanged(CuratorFramework client, ConnectionState state) {
 
-                    logger.info("stateChanged ========{}",state);
+                    logger.info("stateChanged ========{}", state);
                     if (state == ConnectionState.LOST) {
                         CuratorZookeeperClient.this.stateChanged(StateListener.DISCONNECTED);
                     } else if (state == ConnectionState.CONNECTED) {
                         CuratorZookeeperClient.this.stateChanged(StateListener.CONNECTED);
+
+
                     } else if (state == ConnectionState.RECONNECTED) {
                         CuratorZookeeperClient.this.stateChanged(StateListener.RECONNECTED);
                     }
@@ -90,7 +91,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     public void createPersistent(String path) {
         try {
 
-            logger.info("createPersistent {}",path);
+            logger.info("createPersistent {}", path);
             client.create().forPath(path);
         } catch (NodeExistsException e) {
         } catch (Exception e) {
@@ -101,7 +102,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     @Override
     public void createEphemeral(String path) {
         try {
-            logger.info("createEphemeral {}",path);
+            logger.info("createEphemeral {}", path);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
         } catch (NodeExistsException e) {
         } catch (Exception e) {
@@ -113,7 +114,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     protected void createPersistent(String path, String data) {
         byte[] dataBytes = data.getBytes(CHARSET);
         try {
-            logger.info("createPersistent {} data {}",path,data);
+            logger.info("createPersistent {} data {}", path, data);
             client.create().forPath(path, dataBytes);
         } catch (NodeExistsException e) {
             try {
@@ -130,7 +131,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     protected void createEphemeral(String path, String data) {
         byte[] dataBytes = data.getBytes(CHARSET);
         try {
-            logger.info("createEphemeral {} data {}",path,data);
+            logger.info("createEphemeral {} data {}", path, data);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(path, dataBytes);
         } catch (NodeExistsException e) {
             try {
@@ -256,6 +257,15 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
         listener.unwatch();
     }
 
+    /**
+     * just for unit test
+     *
+     * @return
+     */
+    CuratorFramework getClient() {
+        return client;
+    }
+
     public static class CuratorWatcherImpl implements CuratorWatcher, TreeCacheListener {
 
         private CuratorFramework client;
@@ -283,18 +293,18 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
         public void process(WatchedEvent event) throws Exception {
 
 
-            logger.info("=========watchedEvent {}",event);
+            logger.info("=========watchedEvent {}", event);
 
-                if (childListener != null) {
-                    String path = event.getPath() == null ? "" : event.getPath();
-                    childListener.childChanged(path,
-                            // if path is null, curator using watcher will throw NullPointerException.
-                            // if client connect or disconnect to server, zookeeper will queue
-                            // watched event(Watcher.Event.EventType.None, .., path = null).
-                            StringUtils.isNotEmpty(path)
-                                    ? client.getChildren().usingWatcher(this).forPath(path)
-                                    : Collections.<String>emptyList());
-                }
+            if (childListener != null) {
+                String path = event.getPath() == null ? "" : event.getPath();
+                childListener.childChanged(path,
+                        // if path is null, curator using watcher will throw NullPointerException.
+                        // if client connect or disconnect to server, zookeeper will queue
+                        // watched event(Watcher.Event.EventType.None, .., path = null).
+                        StringUtils.isNotEmpty(path)
+                                ? client.getChildren().usingWatcher(this).forPath(path)
+                                : Collections.<String>emptyList());
+            }
 
         }
 
@@ -347,14 +357,5 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                 dataListener.dataChanged(path, content, eventType);
             }
         }
-    }
-
-    /**
-     * just for unit test
-     *
-     * @return
-     */
-    CuratorFramework getClient() {
-        return client;
     }
 }

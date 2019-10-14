@@ -311,7 +311,6 @@ public class UrlUtils {
     }
 
 
-
     public static URL getEmptyUrl(String service, String category) {
         String group = null;
         String version = null;

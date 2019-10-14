@@ -46,7 +46,7 @@ public class CollectionUtils {
         }
     };
 
-    public  CollectionUtils() {
+    public CollectionUtils() {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

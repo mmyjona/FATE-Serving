@@ -22,8 +22,6 @@ import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.common.*;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
-import com.webank.ai.fate.register.interfaces.Registry;
-import com.webank.ai.fate.register.interfaces.RegistryService;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
@@ -33,7 +31,6 @@ import com.webank.ai.fate.register.utils.URLBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,181 +45,33 @@ import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 public class ZookeeperRegistry extends FailbackRegistry {
 
 
-    @Override
-    public  void  doSubProject(String project){
-
-        String  path =  root+Constants.PATH_SEPARATOR+project;
-
-
-        List<String>  environments =zkClient.addChildListener(path,(parent,childrens)->{
-            if(StringUtils.isNotEmpty(parent)) {
-                logger.info("fire environments changes {}", childrens);
-
-                subEnvironments(path, project, childrens);
-            }
-        });
-        logger.info("environments {}",environments);
-        subEnvironments(path,project,environments);
-    }
-
-    private  void  subEnvironments(String path,String project,List<String>  environments){
-
-            if (environments != null) {
-
-                for (String environment : environments) {
-
-                    String  tempPath = path + Constants.PATH_SEPARATOR + environment;
-
-
-
-                    List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
-
-                        if(StringUtils.isNotEmpty(parent)) {
-                            logger.info("fire services changes {}", childrens);
-
-                            subServices(project, environment, childrens);
-                        }
-
-                    });
-
-
-                    subServices(project, environment, services);
-                }
-            }
-    }
-
-
-    private   void  subServices(String project,String environment,List<String>  services){
-
-        if(services!=null) {
-            for(String  service:services) {
-
-                String  subString =project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR +service;
-                logger.info("subServices sub {}",subString);
-                subscribe(URL.valueOf(subString),urls -> {
-
-                    logger.info("change services urls ="+urls);
-                });
-            }
-        }
-
-    }
-
-
-    private  String  parseRegisterService(RegisterService registerService ){
-
-        String serviceName = registerService.serviceName();
-        String version  =registerService.version();
-        String param = "?";
-        RouterModel  routerModel =registerService.routerModel();
-        param = param + Constants.ROUTER_MODEL + "=" + routerModel.name();
-        param =param+"&";
-        param = param + Constants.TIMESTAMP_KEY +"="+ System.currentTimeMillis();
-        String key =   serviceName;
-        boolean  appendParam =  false;
-        if (StringUtils.isNotEmpty(version)) {
-            param = param + "&" + Constants.VERSION + "=" + version;
-        }
-        if(this.getServieWeightMap().containsKey(serviceName+".weight")){
-            int weight = this.getServieWeightMap().get(serviceName+".weight");
-            param = param + "&" + Constants.WEIGHT_KEY + "=" + weight;
-        }
-        key= key+ param;
-        return  key;
-    }
-
-    Set<String>  registedString = Sets.newHashSet();
-    public synchronized void   register(Set<RegisterService> sets){
-
-        String hostAddress = NetUtils.getLocalIp();
-        Preconditions.checkArgument(port!=0);
-        Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
-
-        Set<URL> registered =this.getRegistered();
-        for(RegisterService  service:sets){
-            URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
-            if(service.useDynamicEnvironment()){
-
-                if(CollectionUtils.isNotEmpty(dynamicEnvironments)){
-                    dynamicEnvironments.forEach(environment->{
-                        URL  newServiceUrl= serviceUrl.setEnvironment(environment);
-                        String serviceName = service.serviceName()+environment;
-                        if(!registedString.contains(serviceName)) {
-                            this.register(newServiceUrl);
-                            this.registedString.add(serviceName);
-                        }else{
-                            logger.info("url {} is already registed,will not do anything ",newServiceUrl);
-                        }
-                    });
-                }
-            }
-            else{
-                if(!registedString.contains(service.serviceName())) {
-                    this.register(serviceUrl);
-                    this.registedString.add(service.serviceName());
-                }
-            }
-        }
-        logger.info("registed urls {}",registered);
-    }
-
-
-    public static synchronized ZookeeperRegistry  getRegistery(String  url,String  project,String  environment,int port){
-
-        if(url==null) {
-            return null;
-        }
-        URL registryUrl = URL.valueOf(url);
-        registryUrl=registryUrl.addParameter(Constants.ENVIRONMENT_KEY,environment);
-        registryUrl=registryUrl.addParameter(Constants.SERVER_PORT,port);
-        registryUrl=registryUrl.addParameter(Constants.PROJECT_KEY,project);
-        List<URL>  backups=registryUrl.getBackupUrls();
-
-        if(registeryMap.get(registryUrl)==null) {
-            URL finalRegistryUrl = registryUrl;
-            registeryMap.computeIfAbsent(registryUrl, n->{
-                CuratorZookeeperTransporter curatorZookeeperTransporter = new CuratorZookeeperTransporter();
-                ZookeeperRegistryFactory zookeeperRegistryFactory = new ZookeeperRegistryFactory();
-                zookeeperRegistryFactory.setZookeeperTransporter(curatorZookeeperTransporter);
-                ZookeeperRegistry zookeeperRegistry = (ZookeeperRegistry) zookeeperRegistryFactory.createRegistry(finalRegistryUrl);
-                return zookeeperRegistry;
-            });
-
-        }
-        return  registeryMap.get(registryUrl);
-
-    };
-
-
-    public   void  addDynamicEnvironment(String environment){
-        dynamicEnvironments.add(environment);
-    }
-
-    public  static  ConcurrentMap<URL,ZookeeperRegistry>   registeryMap =  new ConcurrentHashMap();
     private static final Logger logger = LogManager.getLogger();
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
     private final static String DEFAULT_ROOT = "FATE-SERVICES";
-    private final static String ROOT_KEY ="root";
-    private   String   environment;
-    private   Set<String>  dynamicEnvironments  =new  HashSet<String>();
-    private   String  project;
+    private final static String ROOT_KEY = "root";
+    public static ConcurrentMap<URL, ZookeeperRegistry> registeryMap = new ConcurrentHashMap();
     private final String root;
-    private  int  port;
-    String DYNAMIC_KEY = "dynamic";
     private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<>();
 
+    ;
     private final ZookeeperClient zkClient;
-
+    Set<String> registedString = Sets.newHashSet();
+    String DYNAMIC_KEY = "dynamic";
+    Set<String> anyServices = new HashSet<String>();
+    private String environment;
+    private Set<String> dynamicEnvironments = new HashSet<String>();
+    private String project;
+    private int port;
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
 //
-        String group = url.getParameter(ROOT_KEY,DEFAULT_ROOT);
+        String group = url.getParameter(ROOT_KEY, DEFAULT_ROOT);
         if (!group.startsWith(PATH_SEPARATOR)) {
             group = PATH_SEPARATOR + group;
         }
-        this.environment = url.getParameter(ENVIRONMENT_KEY,"online");
-        project=url.getParameter(PROJECT_KEY);
-        port = url.getParameter(SERVER_PORT)!=null?new Integer(url.getParameter(SERVER_PORT)):0;
+        this.environment = url.getParameter(ENVIRONMENT_KEY, "online");
+        project = url.getParameter(PROJECT_KEY);
+        port = url.getParameter(SERVER_PORT) != null ? new Integer(url.getParameter(SERVER_PORT)) : 0;
 
         this.root = group;
         zkClient = zookeeperTransporter.connect(url);
@@ -237,6 +86,153 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 }
             }
         });
+    }
+
+    public static synchronized ZookeeperRegistry getRegistery(String url, String project, String environment, int port) {
+
+        if (url == null) {
+            return null;
+        }
+        URL registryUrl = URL.valueOf(url);
+        registryUrl = registryUrl.addParameter(Constants.ENVIRONMENT_KEY, environment);
+        registryUrl = registryUrl.addParameter(Constants.SERVER_PORT, port);
+        registryUrl = registryUrl.addParameter(Constants.PROJECT_KEY, project);
+        List<URL> backups = registryUrl.getBackupUrls();
+
+        if (registeryMap.get(registryUrl) == null) {
+            URL finalRegistryUrl = registryUrl;
+            registeryMap.computeIfAbsent(registryUrl, n -> {
+                CuratorZookeeperTransporter curatorZookeeperTransporter = new CuratorZookeeperTransporter();
+                ZookeeperRegistryFactory zookeeperRegistryFactory = new ZookeeperRegistryFactory();
+                zookeeperRegistryFactory.setZookeeperTransporter(curatorZookeeperTransporter);
+                ZookeeperRegistry zookeeperRegistry = (ZookeeperRegistry) zookeeperRegistryFactory.createRegistry(finalRegistryUrl);
+                return zookeeperRegistry;
+            });
+
+        }
+        return registeryMap.get(registryUrl);
+
+    }
+
+    @Override
+    public void doSubProject(String project) {
+
+        String path = root + Constants.PATH_SEPARATOR + project;
+
+
+        List<String> environments = zkClient.addChildListener(path, (parent, childrens) -> {
+            if (StringUtils.isNotEmpty(parent)) {
+                logger.info("fire environments changes {}", childrens);
+                subEnvironments(path, project, childrens);
+            }
+        });
+        logger.info("environments {}", environments);
+        if (environments == null) {
+            logger.info("environment is null,maybe zk is not started");
+            throw new RuntimeException("environment is null");
+        }
+
+        subEnvironments(path, project, environments);
+    }
+
+    private void subEnvironments(String path, String project, List<String> environments) {
+
+        if (environments != null) {
+
+            for (String environment : environments) {
+
+                String tempPath = path + Constants.PATH_SEPARATOR + environment;
+
+
+                List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
+
+                    if (StringUtils.isNotEmpty(parent)) {
+                        logger.info("fire services changes {}", childrens);
+
+                        subServices(project, environment, childrens);
+                    }
+
+                });
+
+
+                subServices(project, environment, services);
+            }
+        }
+    }
+
+    private void subServices(String project, String environment, List<String> services) {
+
+        if (services != null) {
+            for (String service : services) {
+
+                String subString = project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + service;
+                logger.info("subServices sub {}", subString);
+                subscribe(URL.valueOf(subString), urls -> {
+
+                    logger.info("change services urls =" + urls);
+                });
+            }
+        }
+
+    }
+
+    private String parseRegisterService(RegisterService registerService) {
+
+        String serviceName = registerService.serviceName();
+        String version = registerService.version();
+        String param = "?";
+        RouterModel routerModel = registerService.routerModel();
+        param = param + Constants.ROUTER_MODEL + "=" + routerModel.name();
+        param = param + "&";
+        param = param + Constants.TIMESTAMP_KEY + "=" + System.currentTimeMillis();
+        String key = serviceName;
+        boolean appendParam = false;
+        if (StringUtils.isNotEmpty(version)) {
+            param = param + "&" + Constants.VERSION + "=" + version;
+        }
+        if (this.getServieWeightMap().containsKey(serviceName + ".weight")) {
+            int weight = this.getServieWeightMap().get(serviceName + ".weight");
+            param = param + "&" + Constants.WEIGHT_KEY + "=" + weight;
+        }
+        key = key + param;
+        return key;
+    }
+
+    public synchronized void register(Set<RegisterService> sets) {
+
+        String hostAddress = NetUtils.getLocalIp();
+        Preconditions.checkArgument(port != 0);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
+
+        Set<URL> registered = this.getRegistered();
+        for (RegisterService service : sets) {
+            URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+            if (service.useDynamicEnvironment()) {
+
+                if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
+                    dynamicEnvironments.forEach(environment -> {
+                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                        String serviceName = service.serviceName() + environment;
+                        if (!registedString.contains(serviceName)) {
+                            this.register(newServiceUrl);
+                            this.registedString.add(serviceName);
+                        } else {
+                            logger.info("url {} is already registed,will not do anything ", newServiceUrl);
+                        }
+                    });
+                }
+            } else {
+                if (!registedString.contains(service.serviceName())) {
+                    this.register(serviceUrl);
+                    this.registedString.add(service.serviceName());
+                }
+            }
+        }
+        logger.info("registed urls {}", registered);
+    }
+
+    public void addDynamicEnvironment(String environment) {
+        dynamicEnvironments.add(environment);
     }
 
     @Override
@@ -258,8 +254,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
     public void doRegister(URL url) {
         try {
 
-            String  urlPath =toUrlPath(url);
-            logger.info("create urlpath {} ",urlPath);
+            String urlPath = toUrlPath(url);
+            logger.info("create urlpath {} ", urlPath);
             zkClient.create(urlPath, true);
         } catch (Throwable e) {
             throw new RuntimeException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
@@ -275,16 +271,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
     }
 
-
-    Set<String>   anyServices  =  new HashSet<String>();
-
     @Override
     public void doSubscribe(final URL url, final NotifyListener listener) {
         try {
 
 
             List<URL> urls = new ArrayList<>();
-            if(ANY_VALUE.equals(url.getEnvironment())){
+            if (ANY_VALUE.equals(url.getEnvironment())) {
 
                 String root = toRootPath();
                 ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
@@ -296,7 +289,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 if (zkListener == null) {
                     listeners.putIfAbsent(listener, (parentPath, currentChilds) -> {
 
-                        if(parentPath.equals(Constants.PROVIDERS_CATEGORY)){
+                        if (parentPath.equals(Constants.PROVIDERS_CATEGORY)) {
                             for (String child : currentChilds) {
                                 child = URL.decode(child);
                                 if (!anyServices.contains(child)) {
@@ -315,18 +308,17 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
                 }
 
-                String  xx = root+"/"+url.getProject();
+                String xx = root + "/" + url.getProject();
                 List<String> children = zkClient.addChildListener(xx, zkListener);
 
 
+                for (String environment : children) {
 
-                for(String environment:children){
+                    //URL  childUrl =  url.setEnvironment(environment);
+                    //urls.add(childUrl);
 
-                  //URL  childUrl =  url.setEnvironment(environment);
-                  //urls.add(childUrl);
-
-                  xx=xx+"/"+environment;
-                  List<String> interfaces=  zkClient.addChildListener(xx,zkListener);
+                    xx = xx + "/" + environment;
+                    List<String> interfaces = zkClient.addChildListener(xx, zkListener);
 
                     if (interfaces != null) {
                         for (String inter : interfaces) {
@@ -334,7 +326,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
                             List<String> services = zkClient.addChildListener(xx, zkListener);
 
-                            if(services!=null) {
+                            if (services != null) {
                                 urls.addAll(toUrlsWithEmpty(url, xx, services));
                             }
 
@@ -346,9 +338,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 notify(url, listener, urls);
 
 
-
             }
-
 
 
 //            if (ANY_VALUE.equals(url.getServiceInterface())) {
@@ -383,8 +373,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 //                    }
 //                }
 //            }
-            else
-                {
+            else {
 
                 for (String path : toCategoriesPath(url)) {
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
@@ -394,14 +383,14 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     }
                     ChildListener zkListener = listeners.get(listener);
                     if (zkListener == null) {
-                        listeners.putIfAbsent(listener, (parentPath, currentChilds) ->{
-                                   if(StringUtils.isNotEmpty(parentPath)) {
-                                       ZookeeperRegistry.this.notify(url, listener,
-                                               toUrlsWithEmpty(url, parentPath, currentChilds));
-                                   }
+                        listeners.putIfAbsent(listener, (parentPath, currentChilds) -> {
+                                    if (StringUtils.isNotEmpty(parentPath)) {
+                                        ZookeeperRegistry.this.notify(url, listener,
+                                                toUrlsWithEmpty(url, parentPath, currentChilds));
+                                    }
 
                                 }
-                              );
+                        );
                         zkListener = listeners.get(listener);
                     }
                     zkClient.create(path, false);
@@ -410,10 +399,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
                         urls.addAll(toUrlsWithEmpty(url, path, children));
                     }
                 }
-                    notify(url, listener, urls);
+                notify(url, listener, urls);
 
-           // }
-        }
+                // }
+            }
 
 
         } catch (Throwable e) {
@@ -428,8 +417,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
             ChildListener zkListener = listeners.get(listener);
             if (zkListener != null) {
                 for (String path : toCategoriesPath(url)) {
-                        zkClient.removeChildListener(path, zkListener);
-                    }
+                    zkClient.removeChildListener(path, zkListener);
+                }
 
             }
         }
@@ -468,14 +457,14 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private String toServicePath(URL url) {
-        String project = url.getProject()!=null?url.getProject():this.project;
-        String environment =  url.getEnvironment()!=null?url.getEnvironment():this.environment;
+        String project = url.getProject() != null ? url.getProject() : this.project;
+        String environment = url.getEnvironment() != null ? url.getEnvironment() : this.environment;
         String name = url.getServiceInterface();
         if (ANY_VALUE.equals(name)) {
             return toRootPath();
         }
 
-        String  result = toRootDir() +project+ Constants.PATH_SEPARATOR+environment+Constants.PATH_SEPARATOR+ URL.encode(name);
+        String result = toRootDir() + project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + URL.encode(name);
         return result;
     }
 
@@ -496,8 +485,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private String toCategoryPath(URL url) {
 
         String servicePath = toServicePath(url);
-        String  category = url.getParameter(CATEGORY_KEY, DEFAULT_CATEGORY);
-        return  servicePath+ PATH_SEPARATOR + category;
+        String category = url.getParameter(CATEGORY_KEY, DEFAULT_CATEGORY);
+        return servicePath + PATH_SEPARATOR + category;
     }
 
     private String toUrlPath(URL url) {

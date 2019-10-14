@@ -24,17 +24,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class BaseLoggerPrinter implements   LoggerPrinter<Object,ReturnResult>{
+public class BaseLoggerPrinter implements LoggerPrinter<Object, ReturnResult> {
 
 
-    static final   String  LOGGER_NAME =  "flow";
+    static final String LOGGER_NAME = "flow";
 
     private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
+
     @Override
     public void printLog(Context context, Object req, ReturnResult resp) {
 
-        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(),context.getSeqNo(), Dict.NONE, context.getActionType(), context.getCostTime(),
-                resp != null ? resp.getRetcode() : Dict.NONE, WatchDog.get(), req,resp);
+        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(), context.getSeqNo(), Dict.NONE, context.getActionType(), context.getCostTime(),
+                resp != null ? resp.getRetcode() : Dict.NONE, WatchDog.get(), req, resp);
 
 
     }
