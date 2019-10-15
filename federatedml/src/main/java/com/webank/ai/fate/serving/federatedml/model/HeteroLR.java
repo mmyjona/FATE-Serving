@@ -62,7 +62,9 @@ public abstract class HeteroLR extends BaseModel {
         double score = 0;
         for (String key : inputData.keySet()) {
             if (this.weight.containsKey(key)) {
-                score += (double) inputData.get(key) * this.weight.get(key);
+                Double x = new Double(inputData.get(key).toString());
+                Double w = new Double(this.weight.get(key).toString());
+                score += w * x;
                 modelWeightHitCount += 1;
                 inputDataHitCount += 1;
                 LOGGER.info("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
