@@ -78,7 +78,7 @@ public class OneHotEncoder extends BaseModel {
                 }
                 List<String> values = colsMap.getValuesList();
                 List<String> encodedVariables = colsMap.getEncodedVariablesList();
-                Integer inputValue = (int) firstData.get(colName);
+                Integer inputValue = new Integer(firstData.get(colName).toString());
                 for (int i = 0; i < values.size(); i ++) {
                     Integer possibleValue = Integer.parseInt(values.get(i));
                     String newColName = encodedVariables.get(i);
