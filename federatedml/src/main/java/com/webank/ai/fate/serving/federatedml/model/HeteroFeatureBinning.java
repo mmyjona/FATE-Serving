@@ -20,7 +20,7 @@ public class HeteroFeatureBinning extends BaseModel {
     private static final Logger LOGGER = LogManager.getLogger();
     private FeatureBinningParam featureBinningParam;
     private FeatureBinningMeta featureBinningMeta;
-    private Map<String, List> splitPoints;
+    private Map<String, List<Double>> splitPoints;
     private List<Long> transformCols;
     private List<String> header;
     private boolean needRun;
@@ -65,14 +65,22 @@ public class HeteroFeatureBinning extends BaseModel {
 
         for (String colName : firstData.keySet()) {
 		    try{
-            List<Double> splitPoint = this.splitPoints.get(colName);
-            Double colValue = Double.valueOf(firstData.get(colName).toString());
-            int colIndex = 0;
-            LOGGER.debug("splitPoints: {}", splitPoint);
-            for (colIndex = 0; colIndex < splitPoint.size(); colIndex ++) {
-                if (colValue <= splitPoint.get(colIndex)) {
-                    break;
+		        if (! this.splitPoints.containsKey(colName)) {
+                    outputData.put(colName, firstData.get(colName));
+		            continue;
                 }
+		        Long thisColIndex = (long) this.header.indexOf(colName);
+		        if (! this.transformCols.contains(thisColIndex)) {
+                    outputData.put(colName, firstData.get(colName));
+                    continue;
+                }
+                List<Double> splitPoint = this.splitPoints.get(colName);
+                Double colValue = Double.valueOf(firstData.get(colName).toString());
+                int colIndex = 0;
+                for (colIndex = 0; colIndex < splitPoint.size(); colIndex ++) {
+                    if (colValue <= splitPoint.get(colIndex)) {
+                        break;
+                    }
             }
             outputData.put(colName, colIndex);
 		    }catch(Throwable e){
