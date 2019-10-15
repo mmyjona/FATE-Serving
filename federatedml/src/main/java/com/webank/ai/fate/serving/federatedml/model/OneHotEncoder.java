@@ -83,9 +83,9 @@ public class OneHotEncoder extends BaseModel {
                     Integer possibleValue = Integer.parseInt(values.get(i));
                     String newColName = encodedVariables.get(i);
                     if (inputValue.equals(possibleValue)) {
-                        outputData.put(newColName, 1);
+                        outputData.put(newColName, 1.0);
                     }else {
-                        outputData.put(newColName, 0);
+                        outputData.put(newColName, 0.0);
                     }
                 }
             }catch(Throwable e){
