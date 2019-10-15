@@ -16,12 +16,16 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.webank.ai.fate.core.constant.StatusCode;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
+import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
+import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,27 +33,65 @@ public class OneHotEncoder extends BaseModel {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private List<String> cols;
+    private Map<String, ColsMap> colsMapMap;
+    private boolean needRun;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init HeteroLR class");
+        LOGGER.info("start init OneHot Encoder class");
         try {
             OneHotMeta oneHotMeta = this.parseModel(OneHotMeta.parser(), protoMeta);
+            OneHotParam oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
+            this.needRun = oneHotMeta.getNeedRun();
 
             this.cols = oneHotMeta.getColsList();
-            // this.intercept = lrModelParam.getIntercept();
+            this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
             ex.printStackTrace();
-            // return StatusCode.ILLEGALDATA;
+             return StatusCode.ILLEGALDATA;
         }
-        //LOGGER.info("Finish init HeteroLR class, model weight is {}", this.weight);
-        //return StatusCode.OK;
-        return 1;
+        LOGGER.info("Finish init OneHot Encoder class");
+        return StatusCode.OK;
     }
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        return null;
-    }
+        LOGGER.info("Start OneHot Encoder transform");
+        HashMap<String, Object> outputData = new HashMap<>();
+        Map<String, Object> firstData = inputData.get(0);
+        if (!this.needRun) {
+            return firstData;
+        }
+        for (String colName : firstData.keySet()) {
+            try{
+                if (! this.cols.contains(colName)) {
+                    outputData.put(colName, firstData.get(colName));
+                    continue;
+                }
+                ColsMap colsMap = this.colsMapMap.get(colName);
 
+                String dataType = colsMap.getDataType();
+                if (! dataType.equals("int")) {
+                    LOGGER.warn("One Hot Encoder support integer input only now");
+                    outputData.put(colName, firstData.get(colName));
+                    continue;
+                }
+                List<String> values = colsMap.getValuesList();
+                List<String> encodedVariables = colsMap.getEncodedVariablesList();
+                Integer inputValue = (int) firstData.get(colName);
+                for (int i = 0; i < values.size(); i ++) {
+                    Integer possibleValue = Integer.parseInt(values.get(i));
+                    String newColName = encodedVariables.get(i);
+                    if (inputValue.equals(possibleValue)) {
+                        outputData.put(newColName, 1);
+                    }else {
+                        outputData.put(newColName, 0);
+                    }
+                }
+            }catch(Throwable e){
+                LOGGER.error("HeteroFeatureBinning error" ,e);
+            }
+        }
+        return outputData;
+    }
 }

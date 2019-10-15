@@ -1,8 +1,10 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.core.constant.StatusCode;
+import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.FeatureBinningMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.TransformMeta;
+import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningParam;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningResult;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.IVParam;
@@ -18,8 +20,6 @@ import java.util.Map;
 
 public class HeteroFeatureBinning extends BaseModel {
     private static final Logger LOGGER = LogManager.getLogger();
-    private FeatureBinningParam featureBinningParam;
-    private FeatureBinningMeta featureBinningMeta;
     private Map<String, List<Double>> splitPoints;
     private List<Long> transformCols;
     private List<String> header;
@@ -32,14 +32,14 @@ public class HeteroFeatureBinning extends BaseModel {
         this.splitPoints = new HashMap<>();
 
         try {
-            this.featureBinningMeta = this.parseModel(FeatureBinningMeta.parser(), protoMeta);
-            this.needRun = this.featureBinningMeta.getNeedRun();
-            TransformMeta transformMeta = this.featureBinningMeta.getTransformParam();
+            FeatureBinningMeta featureBinningMeta = this.parseModel(FeatureBinningMeta.parser(), protoMeta);
+            this.needRun = featureBinningMeta.getNeedRun();
+            TransformMeta transformMeta = featureBinningMeta.getTransformParam();
             this.transformCols = transformMeta.getTransformColsList();
 
-            this.featureBinningParam = this.parseModel(FeatureBinningParam.parser(), protoParam);
-            this.header = this.featureBinningParam.getHeaderList();
-            FeatureBinningResult featureBinningResult = this.featureBinningParam.getBinningResult();
+            FeatureBinningParam featureBinningParam = this.parseModel(FeatureBinningParam.parser(), protoParam);
+            this.header = featureBinningParam.getHeaderList();
+            FeatureBinningResult featureBinningResult = featureBinningParam.getBinningResult();
             Map<String, IVParam> binningResult = featureBinningResult.getBinningResultMap();
             for (String key : binningResult.keySet()) {
                 IVParam oneColResult = binningResult.get(key);
