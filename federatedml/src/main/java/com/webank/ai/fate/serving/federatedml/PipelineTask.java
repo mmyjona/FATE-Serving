@@ -72,8 +72,8 @@ public class PipelineTask {
             }
             List<Map<String, Object>> inputs = new ArrayList<>();
             HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
-            if (upInputComponents != null) {
-                Iterator<Integer> iters = upInputComponents.iterator();
+            if (upInputComponents == null) {
+                Iterator<Integer> iters = upInputComponents .iterator();
                 while (iters.hasNext()) {
                     Integer upInput = iters.next();
                     if (upInput == -1) {
