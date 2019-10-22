@@ -30,7 +30,8 @@ public class DSLParser {
         LOGGER.info("start parse dag from dsl");
         try {
             JSONObject dsl = new JSONObject(jsonStr);
-            JSONObject components = dsl.getJSONObject("components");
+            JSONObject components = dsl.
+                getJSONObject("components");
             
             LOGGER.info("start topo sort");
             topoSort(components, this.topoRankComponent);
@@ -139,10 +140,7 @@ public class DSLParser {
             Integer vertex = stk.pop();
             topoRankComponent.add(componentList.get(vertex));
             ArrayList<Integer> adjV = edges.get(vertex);
-            if (adjV == null) {
-                continue;
-            }
-            for (int i = 0; i < adjV.size(); ++i) {
+            for (int i = 0; i <  adjV.size(); ++i) {
                 Integer downV = adjV.get(i);
                 --inDegree[downV];
                 if (inDegree[downV] == 0) {
